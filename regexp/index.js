@@ -20,8 +20,8 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 		document.querySelector('#description').classList.add('d-none');
 		document.querySelector('#preview').classList.add('d-none');
 
-		var desc = document.querySelector('#des');
-		var prew = document.querySelector('#prev');
+		var desc = document.querySelector('button[data-show="description"]');
+		var prew = document.querySelector('button[data-show="preview"]');
 
 		desc.classList.toggle("active");
 		prew.classList.toggle("active");
