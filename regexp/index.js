@@ -20,6 +20,41 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 		document.querySelector('#description').classList.add('d-none');
 		document.querySelector('#preview').classList.add('d-none');
 
+		var desc = document.querySelector('#des');
+		var prew = document.querySelector('#prev');
+
+		desc.classList.toggle("active");
+		prew.classList.toggle("active");
+
+		var text = 	document.querySelector('#description').value;
+		var output = 	document.querySelector('#preview');
+
+		function bold(str, first, sec, th){
+			return "<strong>" + sec +"</strong>";
+		}
+		function italic(str, first, sec, th){
+			return "<i>" + sec +"</i>";
+		}
+		function image(str, fir){
+			return '<img src="' + fir + '"/>';
+		}
+		function link(str, fir, sec){
+			console.log(str);
+			// if(end !== ".jpg" && end !== ".png"){
+				return '<a href="' + sec + '">' + sec + '</a>';
+			// }else{
+			// 	return str;
+			// }
+		}
+
+		text = text.replace(/(\+\+)([а-щієїґюяь]+)(\+\+)/g, bold);
+		text = text.replace(/(\-\-)([а-щієїґюяь]+)(\-\-)/g, italic);
+		text = text.replace(/\((https:\/\/[\w/.-]+(\.jpg|\.png))\)/g, image);
+		text = text.replace(/([^"(])(https:\/\/[\w/.-]+)/g, link);
+		// text = text.replace(/[^"(](https:\/\/[\w/.-]+)(\.jpg|\.png)?/g, link);
+		
+		output.innerText = text;
+		
 		document.querySelector('#' + e.currentTarget.getAttribute('data-show')).classList.remove('d-none');
 	});
 });
