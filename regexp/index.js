@@ -47,10 +47,10 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 			// }
 		}
 
-		text = text.replace(/(\+\+)([а-щієїґюяь]+)(\+\+)/g, bold);
-		text = text.replace(/(\-\-)([а-щієїґюяь]+)(\-\-)/g, italic);
-		text = text.replace(/\((https:\/\/[\w/.-]+(\.jpg|\.png))\)/g, image);
-		text = text.replace(/([^"(])(https:\/\/[\w/.-]+)/g, link);
+		text = text.replace(/(\+\+)([а-щієїґюяьёъы\w]+)(\+\+)/gi, bold);
+		text = text.replace(/(\-\-)([а-щієїґюяьёъы\w]+)(\-\-)/gi, italic);
+		text = text.replace(/\((https:\/\/[а-щієїґюяьёъы\w/.-]+(\.jpg|\.png))\)/gi, image);
+		text = text.replace(/([^"(])(https:\/\/[а-щієїґюяьёъы\w/.-]+)/gi, link);
 		// text = text.replace(/[^"(](https:\/\/[\w/.-]+)(\.jpg|\.png)?/g, link);
 		
 		output.innerText = text;
