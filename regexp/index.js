@@ -39,19 +39,18 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 			return '<img src="' + fir + '"/>';
 		}
 		function link(str, fir, sec){
-			console.log(str);
 			// if(end !== ".jpg" && end !== ".png"){
-				return '<a href="' + sec + '">' + sec + '</a>';
+				return '<a href="' + fir + '">' + fir + '</a>';
 			// }else{
 			// 	return str;
 			// }
 		}
 
-		text = text.replace(/(\+\+)([а-щієїґюяьёъы\w]+)(\+\+)/gi, bold);
-		text = text.replace(/(\-\-)([а-щієїґюяьёъы\w]+)(\-\-)/gi, italic);
-		text = text.replace(/\((https:\/\/[а-щієїґюяьёъы\w/.-]+(\.jpg|\.png))\)/gi, image);
-		text = text.replace(/([^"(])(https:\/\/[а-щієїґюяьёъы\w/.-]+)/gi, link);
-		// text = text.replace(/[^"(](https:\/\/[\w/.-]+)(\.jpg|\.png)?/g, link);
+		text = text.replace(/(\+\+)([0-9а-щієїґюяьёъы\w]+)(\+\+)/gi, bold);
+		text = text.replace(/(\-\-)([0-9а-щієїґюяьёъы\w]+)(\-\-)/gi, italic);
+		text = text.replace(/\((https?:\/\/[0-9а-щієїґюяьёъы\w\/.:-]+(\.jpg|\.png)\s?)\)/gi, image);
+		text = text.replace(/\s?((?<!")https?:\/\/[0-9а-щієїґюяьёъы\w\/:.-]+)/gi, link);
+		// text = text.replace(/[^"(](https:\/\/[\w/.-]+)(\.jpg|\.png)?/g, link); ([^"(])
 		
 		output.innerText = text;
 		
