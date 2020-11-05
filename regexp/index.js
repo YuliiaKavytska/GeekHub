@@ -49,11 +49,12 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 		text = text.replace(/(\+\+)([0-9а-щієїґюяьёъы\w]+)(\+\+)/gi, bold);
 		text = text.replace(/(\-\-)([0-9а-щієїґюяьёъы\w]+)(\-\-)/gi, italic);
 		text = text.replace(/\((https?:\/\/[0-9а-щієїґюяьёъы\w\/.:-]+(\.jpg|\.png)\s?)\)/gi, image);
-		text = text.replace(/\s?((?<!")https?:\/\/[0-9а-щієїґюяьёъы\w\/:.-]+)/gi, link);
+		text = text.replace(/\s?((?<!")https?:\/\/[0-9а-щієїґюяьёъы\w\/:.-]+)[^.]/gi, link);
 		// text = text.replace(/[^"(](https:\/\/[\w/.-]+)(\.jpg|\.png)?/g, link); ([^"(])
 		
-		output.innerText = text;
-		
+		output.innerHTML = text;
 		document.querySelector('#' + e.currentTarget.getAttribute('data-show')).classList.remove('d-none');
 	});
 });
+
+// ++lorem++ ipsum--dolor-- sit https://google.com img: (https://static01.nyt.com/images/2018/10/04/magazine/04blackhole1/04blackhole1-articleLarge-v3.jpg) ++againbold++ --linklist-- https://google.com, https://google.com and the last link https://blablabla.ugu.
