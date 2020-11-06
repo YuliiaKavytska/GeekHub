@@ -38,19 +38,14 @@ document.querySelectorAll('[data-show]').forEach(function (button) {
 		function image(str, fir){
 			return '<img src="' + fir + '"/>';
 		}
-		function link(str, fir, sec){
-			// if(end !== ".jpg" && end !== ".png"){
+		function link(str, fir){
 				return '<a href="' + fir + '">' + fir + '</a>';
-			// }else{
-			// 	return str;
-			// }
 		}
 
 		text = text.replace(/(\+\+)([0-9а-щієїґюяьёъы\w]+)(\+\+)/gi, bold);
 		text = text.replace(/(\-\-)([0-9а-щієїґюяьёъы\w]+)(\-\-)/gi, italic);
 		text = text.replace(/\((https?:\/\/[0-9а-щієїґюяьёъы\w\/.:-]+(\.jpg|\.png)\s?)\)/gi, image);
-		text = text.replace(/\s?((?<!")https?:\/\/[0-9а-щієїґюяьёъы\w\/:.-]+)[^.]/gi, link);
-		// text = text.replace(/[^"(](https:\/\/[\w/.-]+)(\.jpg|\.png)?/g, link); ([^"(])
+		text = text.replace( /((?<!")https?:\/\/[\w\/\.:-]+[\w\/])/g, link);
 		
 		output.innerHTML = text;
 		document.querySelector('#' + e.currentTarget.getAttribute('data-show')).classList.remove('d-none');
