@@ -95,14 +95,14 @@ jQuery('#column-menu [data-action]').on('click', function (e) {
 		case 'add-left':
 			currentColumn.insertAdjacentHTML("beforeBegin", '<th></th>');
 			for(let i = 0; i < table[0].children[1].childElementCount; i++){
-				table[0].children[1].children[i].children[indexColumn].insertAdjacentHTML("beforeBegin", '<td><input type="text" name="" value=""/></td>');
+				table[0].children[1].children[i].children[indexColumn].insertAdjacentHTML("beforeBegin", '<td><input type="text" name="' + alphabet[indexColumn - 1] + (i + 1) + '" value=""/></td>');
 			}
 			break;
 
 		case 'add-right':
 			currentColumn.insertAdjacentHTML("afterEnd", '<th></th>');
 			for(let i = 0; i < table[0].children[1].childElementCount; i++){
-				table[0].children[1].children[i].children[indexColumn].insertAdjacentHTML("afterEnd", '<td><input type="text" name="" value=""/></td>');
+				table[0].children[1].children[i].children[indexColumn].insertAdjacentHTML("afterEnd", '<td><input type="text" name="' + alphabet[indexColumn - 1] + (i + 1) + '" value=""/></td>');
 			}
 			break;
 
@@ -130,7 +130,7 @@ function reriteNames() {
 	for(let i = 0; i < quantitlyRows; i++){
 		var quantitlyItems = table[0].children[1].children[i].childElementCount;
 		for(let j = 0; j < quantitlyItems - 1; j++){
-			table[0].children[1].children[i].children[j + 1].name = alphabet[j] + (i + 1);
+			table[0].children[1].children[i].children[j + 1].childNodes[0].name = alphabet[j] + (i + 1);
 		}
 	}
 	for(let i = 0; i < quantitlyRows; i++){
@@ -151,8 +151,6 @@ function addListRowAll() {
 				left: e.clientX,
 				top: e.clientY
 			});
-	
-		console.dir(currentRow);
 	});
 }
 addListRowAll();
