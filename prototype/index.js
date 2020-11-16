@@ -142,6 +142,19 @@ function CsvArray(){
 			return i.split(s);
 		});
 	}
+	this.getCell = function(exel){
+		// * массив алфавита
+		let alphabet = ("abcdefghijklmnopqrstuvwxyz").split("");
+		// * проходимся по массиву и ищем совпадения
+		for(let j = 0; j < alphabet.length; j++){
+			if(alphabet[j] == exel[0].toLocaleLowerCase()){
+				// ? удаляем первый символ чтобы осталось только число колонки
+				const column = Number(exel.replace(exel[0], ''));
+				// * возвращем найденое значние (поле)
+				return this[j][column - 1];
+			}
+		}
+	}
 }
 CsvArray.prototype = Object.create(Array.prototype);
 
@@ -151,3 +164,5 @@ CsvArray.prototype = Object.create(Array.prototype);
 
 // table[0][0] = 'zxc';
 // console.log(table.generate());
+
+// console.log(table.getCell('B2'));
