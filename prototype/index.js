@@ -2,15 +2,15 @@ function Csv() {
 }
 
 Csv.prototype.parse = function (string, separator) {
-  const array = string.split("\n");
+  const array = string.split('\n');
   if (string && separator) {
     return this.symbolCase(array, separator);
   } else if (string) {
-    const sumbolArray = [[","], [";"], ["\t"]];
+    const sumbolArray = [[','], [';'], ['\t']];
     for (let i = 0; i < array.length; i += 1) {
-      sumbolArray[0].push(array[i].replace(/[^,]/g, "").length);
-      sumbolArray[1].push(array[i].replace(/[^;]/g, "").length);
-      sumbolArray[2].push(array[i].replace(/[^\t]/g, "").length);
+      sumbolArray[0].push(array[i].replace(/[^,]/g, '').length);
+      sumbolArray[1].push(array[i].replace(/[^;]/g, '').length);
+      sumbolArray[2].push(array[i].replace(/[^\t]/g, '').length);
     }
     let foundSymbol;
     let maxQuant = 0;
@@ -50,7 +50,7 @@ function CsvArray() {
 CsvArray.prototype = Object.create(Array.prototype);
 
 CsvArray.prototype.parse = function (string, separator) {
-  let array = string.split("\n");
+  let array = string.split('\n');
   if (string && separator) {
     array = this.smCase(array, separator);
     for (let j = 0; j < array.length; j += 1) {
@@ -58,11 +58,11 @@ CsvArray.prototype.parse = function (string, separator) {
       this.push(array[j]);
     }
   } else if (string) {
-    const sumbolArray = [[","], [";"], ["\t"]];
+    const sumbolArray = [[','], [';'], ['\t']];
     for (let i = 0; i < array.length; i += 1) {
-      sumbolArray[0].push(array[i].replace(/[^,]/g, "").length);
-      sumbolArray[1].push(array[i].replace(/[^;]/g, "").length);
-      sumbolArray[2].push(array[i].replace(/[^\t]/g, "").length);
+      sumbolArray[0].push(array[i].replace(/[^,]/g, '').length);
+      sumbolArray[1].push(array[i].replace(/[^;]/g, '').length);
+      sumbolArray[2].push(array[i].replace(/[^\t]/g, '').length);
     }
     let foundSymbol;
     let maxQuant = 0;
@@ -93,18 +93,18 @@ CsvArray.prototype.generate = function (separator) {
     }
   } else {
     for (let j = 0; j < this.length; j += 1) {
-      this[j] = this[j].join(",");
+      this[j] = this[j].join(',');
     }
   }
   return this.join('\n');
 };
 
 CsvArray.prototype.smCase = function (ar, s) {
-	return ar.map((i) => i.split(s));
+  return ar.map((i) => i.split(s));
 };
 
 CsvArray.prototype.getCell = function (exel) {
-  const alphabet = ("abcdefghijklmnopqrstuvwxyz").split("");
+  const alphabet = ('abcdefghijklmnopqrstuvwxyz').split('');
   for (let j = 0; j < alphabet.length; j += 1) {
     if (alphabet[j] === exel[0].toLocaleLowerCase()) {
       const column = Number(exel.replace(exel[0], ''));
