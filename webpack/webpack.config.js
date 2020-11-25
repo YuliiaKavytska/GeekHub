@@ -7,7 +7,7 @@ module.exports = {
     },
 
     output: {
-        path: path.resolve(__dirname, "build")
+        path: path.resolve(__dirname, "dist")
     },
 
     plugins: [
@@ -18,10 +18,6 @@ module.exports = {
 
     module: {
         rules: [
-            {
-                test: /\.filename$/,
-                use: ["loader-b", "loader-a"]
-            },
             {
                 test: /\.css$/,
                 use: ["style-loader", "css-loader"]
