@@ -1,0 +1,21 @@
+{
+  "name": "mynodepract",
+  "version": "1.0.0",
+  "description": "my self practicum",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Yuliia Kavitska <julia.k106.l7@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
