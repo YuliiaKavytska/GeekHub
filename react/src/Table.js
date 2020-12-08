@@ -34,30 +34,30 @@ export default function Table(props) {
 			if (colNumber === 0) {
 				column.push(<td key={'body' + (rowsNumber + 1) + colNumber}>{rowsNumber + 1}</td>)
 			} else {
-					if (colNumber === forCol && rowsNumber === row) {
-						column.push(
-							<td
-								key={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
-							>
-								<input
-									name={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
-									value= {data[i][j]}
-								/>
-							</td>
-						);
-						j += 1;
-						forCol += 1
-					} else {
-						column.push(
-							<td
-								key={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
-							>
-								<input
-									name={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
-								/>
-							</td>
-						);
-					}
+				if (colNumber === forCol && rowsNumber === row) {
+					column.push(
+						<td
+							key={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
+						>
+							<input
+								name={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
+								defaulutValue= {data[i][j]}
+							/>
+						</td>
+					);
+					j += 1;
+					forCol += 1
+				} else {
+					column.push(
+						<td
+							key={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
+						>
+							<input
+								name={alpha.charAt(colNumber - 1) + (rowsNumber + 1)}
+							/>
+						</td>
+					);
+				}
 			}
 		}
 		if (rowsNumber === row) {
@@ -84,6 +84,7 @@ export default function Table(props) {
 		</table>
 	);
 };
+//region ======= dtye =======
 /*
 Євпак Віктор Миколайович;ФОП;1985;2;3;55
 Бондаренко Анатолій Васильович;міський голова;1974;2;3;55
@@ -94,3 +95,5 @@ export default function Table(props) {
 Бондаренко Анатолій Васильович;міський голова;1974;2;3;55
 Мойсієнко Василь Миколайович;перший проректор;1965;2;3;55
 */
+//endregion
+
