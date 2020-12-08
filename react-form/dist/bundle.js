@@ -46,10 +46,10 @@ var Email = /*#__PURE__*/function (_PureComponent) {
 
   var _super = _createSuper(Email);
 
-  function Email(props) {
+  function Email() {
     _classCallCheck(this, Email);
 
-    return _super.call(this, props);
+    return _super.apply(this, arguments);
   }
 
   _createClass(Email, [{
@@ -119,10 +119,10 @@ var Name = /*#__PURE__*/function (_PureComponent) {
 
   var _super = _createSuper(Name);
 
-  function Name(props) {
+  function Name() {
     _classCallCheck(this, Name);
 
-    return _super.call(this, props);
+    return _super.apply(this, arguments);
   }
 
   _createClass(Name, [{
@@ -192,10 +192,10 @@ var Password = /*#__PURE__*/function (_PureComponent) {
 
   var _super = _createSuper(Password);
 
-  function Password(props) {
+  function Password() {
     _classCallCheck(this, Password);
 
-    return _super.call(this, props);
+    return _super.apply(this, arguments);
   }
 
   _createClass(Password, [{
@@ -519,14 +519,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var user = {
-  name: 'Кавицька Юлія Олександрівна',
-  email: 'test@mail.com',
-  password: '123asdASD',
+  name: 'Тарас Григорович Шевченко',
+  email: 'taras@mail.com',
+  password: 'Taras123',
   phones: [{
-    number: '123456',
+    number: '651122',
     type: 'home'
   }, {
-    number: '0631234567',
+    number: '0123456789',
+    type: 'mobile'
+  }, {
+    number: '380123456789',
     type: 'mobile'
   }]
 };
