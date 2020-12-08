@@ -453,7 +453,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
       var userNameRule = /^[a-zA-Z0-9.-]+$/;
       var firstRule = /^[^.].*[^.]$/;
       var secRule = /^.*[^.]@[^.].*$/;
-      email.style.backgroundColor = emailParts.length === 2 && userNameRule.test(emailParts[0]) && firstRule.test(email.value) && secRule.test(email.value) ? SUCCESS : ERROR;
+      email.style.backgroundColor = emailParts.length === 2 && userNameRule.test(emailParts[0]) && emailParts[1].includes('.') && firstRule.test(email.value) && secRule.test(email.value) ? SUCCESS : ERROR;
       var password = document.querySelector('[name="password"]');
       var pasFirRule = /[0-9]+/;
       var pasSecRule = /[a-z]+/;

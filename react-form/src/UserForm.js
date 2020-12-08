@@ -29,6 +29,7 @@ export default class UserForm extends PureComponent {
         email.style.backgroundColor =
             emailParts.length === 2 &&
             userNameRule.test(emailParts[0]) &&
+            emailParts[1].includes('.') &&
             firstRule.test(email.value) &&
             secRule.test(email.value) ?
                 SUCCESS : ERROR;
