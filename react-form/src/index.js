@@ -2,14 +2,15 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import UserForm from "./UserForm";
 
-let user = {
-    name: 'Кавицька Юлія Олександрівна',
-    email: 'test@mail.com',
-    password: '123asdASD',
+const user = {
+    name: 'Тарас Григорович Шевченко',
+    email: 'taras@mail.com',
+    password: 'Taras123',
     phones: [
-        {number: '123456', type: 'home'},
-        {number: '0631234567', type: 'mobile'}
-    ]
+        {number: '651122', type: 'home'},
+        {number: '0123456789', type: 'mobile'},
+        {number: '380123456789', type: 'mobile'},
+    ],
 };
 
 ReactDom.render(
