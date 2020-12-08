@@ -1,10 +1,6 @@
 import React, {PureComponent} from 'react';
 
 export default class Password extends PureComponent {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return(
             <div className="form-group">
