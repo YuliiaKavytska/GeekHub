@@ -874,13 +874,13 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
           return false;
         }));
       });
-      this.validation.call(this);
+      this.validation();
     }
   }, {
     key: "formSubmit",
     value: function formSubmit(e) {
       e.preventDefault();
-      this.validation.call(this);
+      this.validation();
     }
   }, {
     key: "validation",

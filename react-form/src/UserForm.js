@@ -34,13 +34,13 @@ export default class UserForm extends PureComponent {
         this.setState((state) => {
             state.phonesValid.push(state.phones.map(() => false))
         })
-        this.validation.call(this);
+        this.validation();
     }
 
     formSubmit(e) {
         e.preventDefault();
 
-        this.validation.call(this);
+        this.validation();
     }
 
     validation() {
