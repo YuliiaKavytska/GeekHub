@@ -868,10 +868,8 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
   _createClass(UserForm, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this2 = this;
-
       this.setState(function (state) {
-        phonesColor: _this2.state.phonesColor.push(_this2.state.phones.map(function (phone) {
+        state.phonesColor.push(state.phones.map(function () {
           return "white";
         }));
       });
@@ -975,11 +973,11 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
     value: function removePhone(elem) {
       var removePhone = _toConsumableArray(this.state.phones);
 
-      removePhone.splice(elem.target.dataset.id, 1);
+      removePhone.splice(Number(elem.target.dataset.id), 1);
 
       var removeColor = _toConsumableArray(this.state.phonesColor);
 
-      removeColor.splice(elem.target.dataset.id, 1);
+      removeColor.splice(Number(elem.target.dataset.id), 1);
       this.setState({
         phones: removePhone,
         phonesColor: removeColor
@@ -988,17 +986,20 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
   }, {
     key: "addPhone",
     value: function addPhone() {
-      this.setState({
-        phones: [].concat(_toConsumableArray(this.state.phones), [{
-          number: '',
-          type: 'home'
-        }])
+      this.setState(function (state) {
+        return {
+          phones: [{
+            number: '',
+            type: 'home'
+          }].concat(_toConsumableArray(state.phones)),
+          phonesColor: ["white"].concat(_toConsumableArray(state.phonesColor))
+        };
       });
     }
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this2 = this;
 
       var _this$state = this.state,
           phones = _this$state.phones,
@@ -1056,12 +1057,12 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
           value: item.number,
           "data-id": index,
           valid: phonesColor[index],
-          onInput: _this3.changePhone
+          onInput: _this2.changePhone
         }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
           key: "select" + index,
           className: "custom-select",
           "data-id": index,
-          onChange: _this3.selectOther,
+          onChange: _this2.selectOther,
           defaultValue: item.type
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("option", {
           value: "home"
@@ -1073,7 +1074,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
           className: "btn btn-danger",
           type: "button",
           "data-id": index,
-          onClick: _this3.removePhone
+          onClick: _this2.removePhone
         }, "\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("small", {
           className: "form-text text-muted",
           key: "small" + index

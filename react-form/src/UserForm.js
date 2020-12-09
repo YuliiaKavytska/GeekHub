@@ -29,8 +29,8 @@ export default class UserForm extends PureComponent {
     }
 
     componentDidMount() {
-        this.setState(state => {
-            phonesColor: this.state.phonesColor.push(this.state.phones.map((phone) => "white"))
+        this.setState((state) => {
+            state.phonesColor.push(state.phones.map(() => "white"))
         })
     }
 
@@ -123,14 +123,16 @@ export default class UserForm extends PureComponent {
 
     removePhone(elem) {
         let removePhone = [...this.state.phones];
-        removePhone.splice(elem.target.dataset.id, 1);
+        removePhone.splice(Number(elem.target.dataset.id), 1);
         let removeColor = [...this.state.phonesColor];
-        removeColor.splice(elem.target.dataset.id, 1);
+        removeColor.splice(Number(elem.target.dataset.id), 1);
         this.setState({phones: removePhone, phonesColor: removeColor});
     }
 
     addPhone() {
-        this.setState( {phones: [...this.state.phones, {number: '', type: 'home'}]});
+        this.setState( (state) => (
+            {phones: [{number: '', type: 'home'}, ...state.phones],
+                phonesColor: ["white", ...state.phonesColor]}));
     }
 
     render() {
