@@ -7,13 +7,13 @@ export default class UserForm extends PureComponent {
 
         this.state = {
             name: props.user.name,
-            nameColor: "white",
+            nameColor: false,
             email: props.user.email,
-            emailColor: "white",
+            emailColor: false,
             password: props.user.password,
-            passwordColor: "white",
+            passwordColor: false,
             phones: props.user.phones,
-            phonesColor: []
+            phonesValid: []
         }
 
         this.formSubmit = this.formSubmit.bind(this);
@@ -26,23 +26,27 @@ export default class UserForm extends PureComponent {
         this.changeEmail = this.changeEmail.bind(this);
         this.changePassword = this.changePassword.bind(this);
         this.changePhone = this.changePhone.bind(this);
+
+        this.validation = this.validation.bind(this);
     }
 
     componentDidMount() {
         this.setState((state) => {
-            state.phonesColor.push(state.phones.map(() => "white"))
+            state.phonesValid.push(state.phones.map(() => false))
         })
+        this.validation.call(this);
     }
 
     formSubmit(e) {
         e.preventDefault();
 
-        const SUCCESS = '#C2E0C6';
-        const ERROR = '#F9D0C4';
+        this.validation.call(this);
+    }
 
+    validation() {
         const {name} = this.state;
         const nameWords = name.trim().split(/\s+/);
-        const nameRes = nameWords.length === 3 && nameWords.every(word => /^[а-щієїґюяьА-ЩІЄЇЮЯЬҐ]+$/.test(word)) ? SUCCESS : ERROR
+        const nameRes = nameWords.length === 3 && nameWords.every(word => /^[а-щієїґюяьА-ЩІЄЇЮЯЬҐ]+$/.test(word));
         this.setState({nameColor: nameRes});
 
         const {email} = this.state;
@@ -55,8 +59,7 @@ export default class UserForm extends PureComponent {
             userNameRule.test(emailParts[0]) &&
             emailParts[1].includes('.') &&
             firstRule.test(email) &&
-            secRule.test(email) ?
-                SUCCESS : ERROR;
+            secRule.test(email);
         this.setState({emailColor: emailRes});
 
         const {password} = this.state;
@@ -67,12 +70,11 @@ export default class UserForm extends PureComponent {
             pasFirRule.test(password) &&
             pasSecRule.test(password) &&
             pasThrRule.test(password) &&
-            password.length >= 8 ?
-                SUCCESS : ERROR;
+            password.length >= 8;
         this.setState({passwordColor: passRes});
 
         let {phones} = this.state;
-        let allPhoneColors = [...this.state.phonesColor]
+        let allPhoneColors = [...this.state.phonesValid]
 
         phones.map((phone, index) => {
             const homeRule = /^[1-9][0-9]{5}$/;
@@ -81,16 +83,16 @@ export default class UserForm extends PureComponent {
             let resColor;
 
             if (phone.type === "home") {
-                resColor = homeRule.test(phone.number.trim()) ? SUCCESS : ERROR;
+                resColor = homeRule.test(phone.number.trim());
             } else  {
                 phone.number.trim().length === 10 ?
-                    (resColor = mobRule10.test(phone.number.trim()) ? SUCCESS : ERROR) :
-                    (resColor = mobRule12.test(phone.number.trim()) ? SUCCESS : ERROR);
+                    (resColor = mobRule10.test(phone.number.trim())) :
+                    (resColor = mobRule12.test(phone.number.trim()));
             }
 
             allPhoneColors[index] = resColor
         })
-        this.setState({phonesColor : allPhoneColors});
+        this.setState({phonesValid : allPhoneColors});
     }
 
     changeName(text) {
@@ -124,19 +126,19 @@ export default class UserForm extends PureComponent {
     removePhone(elem) {
         let removePhone = [...this.state.phones];
         removePhone.splice(Number(elem.target.dataset.id), 1);
-        let removeColor = [...this.state.phonesColor];
+        let removeColor = [...this.state.phonesValid];
         removeColor.splice(Number(elem.target.dataset.id), 1);
-        this.setState({phones: removePhone, phonesColor: removeColor});
+        this.setState({phones: removePhone, phonesValid: removeColor});
     }
 
     addPhone() {
         this.setState( (state) => (
             {phones: [{number: '', type: 'home'}, ...state.phones],
-                phonesColor: ["white", ...state.phonesColor]}));
+                phonesValid: [false, ...state.phonesValid]}));
     }
 
     render() {
-        let {phones, nameColor, emailColor, passwordColor, phonesColor} = this.state;
+        let {phones, nameColor, emailColor, passwordColor, phonesValid} = this.state;
 
         return(
             <div className="container p-5">
@@ -181,16 +183,15 @@ export default class UserForm extends PureComponent {
                             phones.map((item, index) => (
                                 <div className="mb-3">
                                     <div className="input-group">
-                                        <Input key={"input" + index}
-                                               type="text"
+                                        <Input type="text"
                                                className="form-control"
                                                value={item.number}
                                                data-id={index}
-                                               valid={phonesColor[index]}
+                                               valid={phonesValid[index]}
                                                onInput={this.changePhone}
                                         />
-                                        <select key={"select" + index}
-                                                className="custom-select"
+                                        <select key={index + item.number + item.type}
+                                            className="custom-select"
                                                 data-id={index}
                                                 onChange={this.selectOther}
                                                 defaultValue={item.type}
@@ -202,7 +203,7 @@ export default class UserForm extends PureComponent {
                                             <button className="btn btn-danger" type="button" data-id={index} onClick={this.removePhone}>Видалити</button>
                                         </div>
                                     </div>
-                                    <small className="form-text text-muted" key={"small" + index} >
+                                    <small className="form-text text-muted">
                                         {item.type === "home" ?
                                             "Домашній телефон повинен складатися з 6 чисел та не починатися з 0" :
                                             "Мобільний номер повинен складатися з 10 чисел та починатися на 0 або з 12 числе та починатися на 3"}
@@ -219,5 +220,5 @@ export default class UserForm extends PureComponent {
     }
 }
 const Input = styled.input`
-  background-color: ${props => props.valid};
+  background-color: ${props => props.valid ? '#C2E0C6' : '#F9D0C4'};
 `;

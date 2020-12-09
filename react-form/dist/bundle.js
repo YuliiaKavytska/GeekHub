@@ -846,13 +846,13 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
     _this = _super.call(this, props);
     _this.state = {
       name: props.user.name,
-      nameColor: "white",
+      nameColor: false,
       email: props.user.email,
-      emailColor: "white",
+      emailColor: false,
       password: props.user.password,
-      passwordColor: "white",
+      passwordColor: false,
       phones: props.user.phones,
-      phonesColor: []
+      phonesValid: []
     };
     _this.formSubmit = _this.formSubmit.bind(_assertThisInitialized(_this));
     _this.removePhone = _this.removePhone.bind(_assertThisInitialized(_this));
@@ -862,6 +862,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
     _this.changeEmail = _this.changeEmail.bind(_assertThisInitialized(_this));
     _this.changePassword = _this.changePassword.bind(_assertThisInitialized(_this));
     _this.changePhone = _this.changePhone.bind(_assertThisInitialized(_this));
+    _this.validation = _this.validation.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -869,22 +870,26 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.setState(function (state) {
-        state.phonesColor.push(state.phones.map(function () {
-          return "white";
+        state.phonesValid.push(state.phones.map(function () {
+          return false;
         }));
       });
+      this.validation.call(this);
     }
   }, {
     key: "formSubmit",
     value: function formSubmit(e) {
       e.preventDefault();
-      var SUCCESS = '#C2E0C6';
-      var ERROR = '#F9D0C4';
+      this.validation.call(this);
+    }
+  }, {
+    key: "validation",
+    value: function validation() {
       var name = this.state.name;
       var nameWords = name.trim().split(/\s+/);
       var nameRes = nameWords.length === 3 && nameWords.every(function (word) {
         return /^[а-щієїґюяьА-ЩІЄЇЮЯЬҐ]+$/.test(word);
-      }) ? SUCCESS : ERROR;
+      });
       this.setState({
         nameColor: nameRes
       });
@@ -893,7 +898,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
       var userNameRule = /^[a-zA-Z0-9.-]+$/;
       var firstRule = /^[^.].*[^.]$/;
       var secRule = /^.*[^.]@[^.].*$/;
-      var emailRes = emailParts.length === 2 && userNameRule.test(emailParts[0]) && emailParts[1].includes('.') && firstRule.test(email) && secRule.test(email) ? SUCCESS : ERROR;
+      var emailRes = emailParts.length === 2 && userNameRule.test(emailParts[0]) && emailParts[1].includes('.') && firstRule.test(email) && secRule.test(email);
       this.setState({
         emailColor: emailRes
       });
@@ -901,13 +906,13 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
       var pasFirRule = /[0-9]+/;
       var pasSecRule = /[a-z]+/;
       var pasThrRule = /[A-Z]+/;
-      var passRes = pasFirRule.test(password) && pasSecRule.test(password) && pasThrRule.test(password) && password.length >= 8 ? SUCCESS : ERROR;
+      var passRes = pasFirRule.test(password) && pasSecRule.test(password) && pasThrRule.test(password) && password.length >= 8;
       this.setState({
         passwordColor: passRes
       });
       var phones = this.state.phones;
 
-      var allPhoneColors = _toConsumableArray(this.state.phonesColor);
+      var allPhoneColors = _toConsumableArray(this.state.phonesValid);
 
       phones.map(function (phone, index) {
         var homeRule = /^[1-9][0-9]{5}$/;
@@ -916,15 +921,15 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
         var resColor;
 
         if (phone.type === "home") {
-          resColor = homeRule.test(phone.number.trim()) ? SUCCESS : ERROR;
+          resColor = homeRule.test(phone.number.trim());
         } else {
-          phone.number.trim().length === 10 ? resColor = mobRule10.test(phone.number.trim()) ? SUCCESS : ERROR : resColor = mobRule12.test(phone.number.trim()) ? SUCCESS : ERROR;
+          phone.number.trim().length === 10 ? resColor = mobRule10.test(phone.number.trim()) : resColor = mobRule12.test(phone.number.trim());
         }
 
         allPhoneColors[index] = resColor;
       });
       this.setState({
-        phonesColor: allPhoneColors
+        phonesValid: allPhoneColors
       });
     }
   }, {
@@ -975,12 +980,12 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
 
       removePhone.splice(Number(elem.target.dataset.id), 1);
 
-      var removeColor = _toConsumableArray(this.state.phonesColor);
+      var removeColor = _toConsumableArray(this.state.phonesValid);
 
       removeColor.splice(Number(elem.target.dataset.id), 1);
       this.setState({
         phones: removePhone,
-        phonesColor: removeColor
+        phonesValid: removeColor
       });
     }
   }, {
@@ -992,7 +997,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
             number: '',
             type: 'home'
           }].concat(_toConsumableArray(state.phones)),
-          phonesColor: ["white"].concat(_toConsumableArray(state.phonesColor))
+          phonesValid: [false].concat(_toConsumableArray(state.phonesValid))
         };
       });
     }
@@ -1006,7 +1011,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
           nameColor = _this$state.nameColor,
           emailColor = _this$state.emailColor,
           passwordColor = _this$state.passwordColor,
-          phonesColor = _this$state.phonesColor;
+          phonesValid = _this$state.phonesValid;
       return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
         className: "container p-5"
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("form", {
@@ -1051,15 +1056,14 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
           className: "input-group"
         }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(Input, {
-          key: "input" + index,
           type: "text",
           className: "form-control",
           value: item.number,
           "data-id": index,
-          valid: phonesColor[index],
+          valid: phonesValid[index],
           onInput: _this2.changePhone
         }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("select", {
-          key: "select" + index,
+          key: index + item.number + item.type,
           className: "custom-select",
           "data-id": index,
           onChange: _this2.selectOther,
@@ -1076,8 +1080,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
           "data-id": index,
           onClick: _this2.removePhone
         }, "\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438"))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("small", {
-          className: "form-text text-muted",
-          key: "small" + index
+          className: "form-text text-muted"
         }, item.type === "home" ? "Домашній телефон повинен складатися з 6 чисел та не починатися з 0" : "Мобільний номер повинен складатися з 10 чисел та починатися на 0 або з 12 числе та починатися на 3"));
       }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
         className: "btn btn-success mb-2",
@@ -1095,7 +1098,7 @@ var UserForm = /*#__PURE__*/function (_PureComponent) {
 
 
 var Input = styled_components__WEBPACK_IMPORTED_MODULE_1__.default.input(_templateObject(), function (props) {
-  return props.valid;
+  return props.valid ? '#C2E0C6' : '#F9D0C4';
 });
 
 /***/ }),
