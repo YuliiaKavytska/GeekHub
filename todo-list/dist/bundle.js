@@ -2092,7 +2092,7 @@ function App() {
 
 /***/ "./src/components/Footer.js":
 /*!**********************************!*\
-  !*** ./src/components/Footer.js ***!
+  !*** ./src/components/Footer.jsx ***!
   \**********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
