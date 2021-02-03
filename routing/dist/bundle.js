@@ -2227,6 +2227,64 @@ var Header = function Header() {
 
 /***/ }),
 
+/***/ "./src/components/Item.jsx":
+/*!*********************************!*\
+  !*** ./src/components/Item.jsx ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+
+var Item = function Item(_ref) {
+  var item = _ref.item,
+      changeEditingCall = _ref.changeEditingCall,
+      changeItemStatusCall = _ref.changeItemStatusCall,
+      deleteItemCall = _ref.deleteItemCall,
+      changeItemTaskCall = _ref.changeItemTaskCall;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", {
+    className: item.status === 'completed' ? item.editing ? 'completed editing' : 'completed' : item.editing ? 'editing' : undefined,
+    onDoubleClick: function onDoubleClick() {
+      return changeEditingCall(item.id);
+    }
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "view"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    className: "toggle",
+    type: "checkbox",
+    checked: item.status === "completed",
+    onChange: function onChange() {
+      return changeItemStatusCall(item.id);
+    }
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", null, item.task), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
+    className: "destroy",
+    onClick: function onClick() {
+      return deleteItemCall(item.id);
+    }
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
+    className: "edit",
+    value: item.task,
+    onInput: function onInput(e) {
+      return changeItemTaskCall(item.id, e.currentTarget.value);
+    },
+    onBlur: function onBlur() {
+      return changeEditingCall(item.id, false);
+    },
+    ref: function ref(input) {
+      return input && input.focus();
+    }
+  }));
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Item);
+
+/***/ }),
+
 /***/ "./src/components/Main.jsx":
 /*!*********************************!*\
   !*** ./src/components/Main.jsx ***!
@@ -2241,7 +2299,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var _store_todoReducer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../store/todoReducer */ "./src/store/todoReducer.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/esm/react-router.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/esm/react-router.js");
+/* harmony import */ var _Item__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Item */ "./src/components/Item.jsx");
+
 
 
 
@@ -2255,7 +2315,7 @@ var Main = function Main() {
 
   var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_2__.useDispatch)();
 
-  var _useParams = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_3__.useParams)(),
+  var _useParams = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_4__.useParams)(),
       filter = _useParams.filter,
       num = _useParams.num,
       edit = _useParams.edit;
@@ -2329,7 +2389,7 @@ var Main = function Main() {
   }, " Mark all as complete"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("ul", {
     className: "todo-list"
   }, filterResult.map(function (item) {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(Item, {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Item__WEBPACK_IMPORTED_MODULE_3__.default, {
       key: item.id,
       item: item,
       changeEditingCall: changeEditingCall,
@@ -2338,46 +2398,6 @@ var Main = function Main() {
       changeItemTaskCall: changeItemTaskCall
     });
   })));
-};
-
-var Item = function Item(_ref) {
-  var item = _ref.item,
-      changeEditingCall = _ref.changeEditingCall,
-      changeItemStatusCall = _ref.changeItemStatusCall,
-      deleteItemCall = _ref.deleteItemCall,
-      changeItemTaskCall = _ref.changeItemTaskCall;
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", {
-    className: item.status === 'completed' ? item.editing ? 'completed editing' : 'completed' : item.editing ? 'editing' : undefined,
-    onDoubleClick: function onDoubleClick() {
-      return changeEditingCall(item.id);
-    }
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
-    className: "view"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
-    className: "toggle",
-    type: "checkbox",
-    checked: item.status === "completed",
-    onChange: function onChange() {
-      return changeItemStatusCall(item.id);
-    }
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", null, item.task), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
-    className: "destroy",
-    onClick: function onClick() {
-      return deleteItemCall(item.id);
-    }
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
-    className: "edit",
-    value: item.task,
-    onInput: function onInput(e) {
-      return changeItemTaskCall(item.id, e.currentTarget.value);
-    },
-    onBlur: function onBlur() {
-      return changeEditingCall(item.id, false);
-    },
-    ref: function ref(input) {
-      return input && input.focus();
-    }
-  }));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Main);
