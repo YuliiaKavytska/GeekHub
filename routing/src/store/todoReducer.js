@@ -29,7 +29,8 @@ export const toDoSlice = createSlice({
             let element = state.list.findIndex(e => e.id === action.payload.id);
             action.payload.case === false
                 ? state.list[element].editing = false
-                : state.list[element].editing = !state.list[element].editing;
+                :
+                state.list[element].editing = !state.list[element].editing;
             state.filterResult = state.list;
         },
         changeItemTask: (state, action) => {

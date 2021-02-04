@@ -1,28 +1,49 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 
 const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, changeItemTaskCall}) => {
+
+    const changeEditing = useCallback((e) => {
+        console.log(e)
+        changeEditingCall(item.id);
+    }, [item]);
+
+    const changeItemStatus = useCallback(() => {
+        changeItemStatusCall(item.id);
+    }, [item]);
+
+    const deleteItem = useCallback(() => {
+        deleteItemCall(item.id)
+    }, [item]);
+
+    const changeItemTask = useCallback((e) => {
+        changeItemTaskCall(item.id, e.currentTarget.value)
+    }, [item]);
+
+const changeEditingBlurCase = useCallback(() => {
+    changeEditingCall(item.id, false)
+    }, [item]);
 
     return <li className={item.status === 'completed'
         ? (item.editing ? 'completed editing' : 'completed')
         : (item.editing ? 'editing' : undefined)}
-               onDoubleClick={() => changeEditingCall(item.id)}
+               onDoubleClick={changeEditing}
     >
         <div className="view">
             <input className="toggle"
                    type="checkbox"
                    checked={item.status === "completed"}
-                   onChange={() => changeItemStatusCall(item.id)}
+                   onChange={changeItemStatus}
             />
             <label>{item.task}</label>
             <button className="destroy"
-                    onClick={() => deleteItemCall(item.id)}
+                    onClick={deleteItem}
             >
             </button>
         </div>
         <input className="edit"
                value={item.task}
-               onInput={e => changeItemTaskCall(item.id, e.currentTarget.value)}
-               onBlur={() => changeEditingCall(item.id, false)}
+               onInput={changeItemTask}
+               onBlur={changeEditingBlurCase}
                ref={input => input && input.focus()}
         />
     </li>
