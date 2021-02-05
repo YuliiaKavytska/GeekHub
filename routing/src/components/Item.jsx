@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 
 const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, changeItemTaskCall}) => {
 
@@ -22,10 +22,10 @@ const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, ch
         changeEditingCall(item.id, false)
     }, [item]);
 
-    const focusInput = useCallback(input =>
-        input && input.focus(),
-        [item]);
-
+    const input = React.createRef();
+    useEffect(() => {
+        if (input.current) input.current.focus();
+    }, [item]);
 
     return <li className={item.status === 'completed'
         ? (item.editing ? 'completed editing' : 'completed')
@@ -47,7 +47,7 @@ const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, ch
                value={item.task}
                onInput={changeItemTask}
                onBlur={changeEditingBlurCase}
-               ref={focusInput}/>
+               ref={input}/>
     </li>
 }
 

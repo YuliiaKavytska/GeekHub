@@ -2262,8 +2262,9 @@ var Item = function Item(_ref) {
   var changeEditingBlurCase = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
     changeEditingCall(item.id, false);
   }, [item]);
-  var focusInput = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (input) {
-    return input && input.focus();
+  var input = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createRef();
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (input.current) input.current.focus();
   }, [item]);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", {
     className: item.status === 'completed' ? item.editing ? 'completed editing' : 'completed' : item.editing ? 'editing' : undefined,
@@ -2283,7 +2284,7 @@ var Item = function Item(_ref) {
     value: item.task,
     onInput: changeItemTask,
     onBlur: changeEditingBlurCase,
-    ref: focusInput
+    ref: input
   }));
 };
 
