@@ -2247,37 +2247,43 @@ var Item = function Item(_ref) {
       changeItemStatusCall = _ref.changeItemStatusCall,
       deleteItemCall = _ref.deleteItemCall,
       changeItemTaskCall = _ref.changeItemTaskCall;
+  var changeEditing = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (e) {
+    changeEditingCall(item.id);
+  }, [item]);
+  var changeItemStatus = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    changeItemStatusCall(item.id);
+  }, [item]);
+  var deleteItem = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    deleteItemCall(item.id);
+  }, [item]);
+  var changeItemTask = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (e) {
+    changeItemTaskCall(item.id, e.currentTarget.value);
+  }, [item]);
+  var changeEditingBlurCase = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    changeEditingCall(item.id, false);
+  }, [item]);
+  var focusInput = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (input) {
+    return input && input.focus();
+  }, [item]);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("li", {
     className: item.status === 'completed' ? item.editing ? 'completed editing' : 'completed' : item.editing ? 'editing' : undefined,
-    onDoubleClick: function onDoubleClick() {
-      return changeEditingCall(item.id);
-    }
+    onDoubleClick: changeEditing
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
     className: "view"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
     className: "toggle",
     type: "checkbox",
     checked: item.status === "completed",
-    onChange: function onChange() {
-      return changeItemStatusCall(item.id);
-    }
+    onChange: changeItemStatus
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("label", null, item.task), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", {
     className: "destroy",
-    onClick: function onClick() {
-      return deleteItemCall(item.id);
-    }
+    onClick: deleteItem
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("input", {
     className: "edit",
     value: item.task,
-    onInput: function onInput(e) {
-      return changeItemTaskCall(item.id, e.currentTarget.value);
-    },
-    onBlur: function onBlur() {
-      return changeEditingCall(item.id, false);
-    },
-    ref: function ref(input) {
-      return input && input.focus();
-    }
+    onInput: changeItemTask,
+    onBlur: changeEditingBlurCase,
+    ref: focusInput
   }));
 };
 

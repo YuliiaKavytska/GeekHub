@@ -3,7 +3,6 @@ import React, {useCallback} from 'react';
 const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, changeItemTaskCall}) => {
 
     const changeEditing = useCallback((e) => {
-        console.log(e)
         changeEditingCall(item.id);
     }, [item]);
 
@@ -19,15 +18,19 @@ const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, ch
         changeItemTaskCall(item.id, e.currentTarget.value)
     }, [item]);
 
-const changeEditingBlurCase = useCallback(() => {
-    changeEditingCall(item.id, false)
+    const changeEditingBlurCase = useCallback(() => {
+        changeEditingCall(item.id, false)
     }, [item]);
+
+    const focusInput = useCallback(input =>
+        input && input.focus(),
+        [item]);
+
 
     return <li className={item.status === 'completed'
         ? (item.editing ? 'completed editing' : 'completed')
         : (item.editing ? 'editing' : undefined)}
-               onDoubleClick={changeEditing}
-    >
+               onDoubleClick={changeEditing}>
         <div className="view">
             <input className="toggle"
                    type="checkbox"
@@ -44,8 +47,7 @@ const changeEditingBlurCase = useCallback(() => {
                value={item.task}
                onInput={changeItemTask}
                onBlur={changeEditingBlurCase}
-               ref={input => input && input.focus()}
-        />
+               ref={focusInput}/>
     </li>
 }
 
