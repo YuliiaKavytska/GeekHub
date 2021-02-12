@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect} from 'react';
+import {Link} from "react-router-dom";
 
 const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, changeItemTaskCall}) => {
 
@@ -42,6 +43,14 @@ const Item = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, ch
             <button className="destroy"
                     onClick={deleteItem}>
             </button>
+            <div>
+                <span>
+                    <Link to={`/todo/${item.id}`} >F</Link>
+                </span>
+                <span>
+                    <Link to={`/todo/${item.id}/edit`} >E</Link>
+                </span>
+            </div>
         </div>
         <input className="edit"
                value={item.task}

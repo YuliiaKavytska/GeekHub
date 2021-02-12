@@ -2,7 +2,7 @@ const {Router} = require('express');
 const router = Router();
 const {resolve} = require('path');
 const fs = require('fs/promises');
-
+// "/all"
 router.get("/all", (req, res) => {
     try {
         fs.readFile(resolve(__dirname, 'todo.json')).then(response => {

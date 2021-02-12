@@ -11,7 +11,7 @@ import Header from "./components/Header";
 const App = () => {
     return <section className="todoapp">
         <Header/>
-        <Route path={'/:filter?/:num?/:edit?'} render={() => <Main/>}/>
+        <Route path={'/:filter(active||all||completed||todo)?/:num?/:edit?'} render={() => <Main/>}/>
         <Footer/>
     </section>
 }

@@ -8,11 +8,12 @@ const bodyParser = require("body-parser");
 server.use(bodyParser.json());
 
 // ПРОБОВАЛА ТАКИЕ ВАРИАНТЫ:
-// /^\/(all|active|completed|todo)/ - аналогично регулярке со всем проверками
-// '/all - не видит никаких других роутов
-// /:filter(active|all|todo|completed)?/:id(\d+)?/:edit(edit)? - возвращает пустую страницу так как в ответе приходит HTML
+// /^\/(all|active|completed|todo)/
+// '/all'
+// /:filter(active|all|todo|completed)?/:id(\d+)?/:edit(edit)?
+//  - работает все кроме фильтрации 1 задания возвращает пустую страницу так как в ответе приходит HTML
 
-server.get("/:filter(active|all|todo|completed)?/:id(\\d+)?/:edit(edit)?", (req, res) => {
+server.get('/:filter(active|all|todo|completed)?/:id(\\d+)?/:edit(edit)?', (req, res) => {
     if (req.xhr) {
         fs.readFile(resolve(__dirname, 'todo.json')).then(response => {
             const todoObj = JSON.parse(response);
