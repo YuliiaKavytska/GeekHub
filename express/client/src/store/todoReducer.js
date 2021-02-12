@@ -107,111 +107,60 @@ export const toDoSlice = createSlice({
 });
 
 export const getUsersTC = (filter, id = null, editingMode = null) => (dispatch) => {
-    fetch('/all', {
-        method: 'GET',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
+    ajax('/api/all', 'GET').then(data => {
+        if (data.resultCode === 0) {
+            dispatch(setTodos({list: data.list}));
+            dispatch(changeFilter({filter, id}));
+            if (editingMode) dispatch(changeEditing({id}))
         }
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) {
-                dispatch(setTodos({list: data.list}));
-                dispatch(changeFilter({filter, id}));
-                if (editingMode) {
-                    dispatch(changeEditing({id}))
-                }
-            }
-        });
+    });
 }
 
 export const completeAllTC = () => (dispatch) => {
-    fetch('/completeAll', {
-        method: 'GET',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        }
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) dispatch(completedAll());
-        });
+    ajax('/api/completeAll', 'GET').then(data => {
+        if (data.resultCode === 0) dispatch(completedAll());
+    });
 }
 
 export const changeStatusTC = (id) => (dispatch) => {
-    fetch('/changeTodo', {
-        method: 'PUT',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({id})
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) dispatch(changeItemStatus({id}));
-        });
+    ajax('/api/changeTodo', 'PUT', {id}).then(data => {
+        if (data.resultCode === 0) dispatch(changeItemStatus({id}));
+    });
 }
 
 export const deleteTodoTC = (id) => (dispatch) => {
-    fetch('/changeTodo', {
-        method: 'DELETE',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({id})
+    ajax('/api/changeTodo', 'DELETE', {id}).then(data => {
+        if (data.resultCode === 0) dispatch(deleteItem({id}))
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) dispatch(deleteItem({id}))
-        })
 }
 
 export const addNewTodoTC = (lastTask) => (dispatch) => {
-    fetch('/newTodo', {
-        method: 'POST',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({task: lastTask})
+    ajax('/api/newTodo', 'POST', {task: lastTask}).then(data => {
+        if (data.resultCode === 0) dispatch(addItem());
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) dispatch(addItem());
-        })
 }
 
 export const deleteCompletedTC = () => (dispatch) => {
-    fetch('/deleteCompleted', {
-        method: 'DELETE',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        }
+    ajax('/api/deleteCompleted', 'DELETE').then(data => {
+        if (data.resultCode === 0) dispatch(deleteCompleted());
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) dispatch(deleteCompleted());
-        })
 }
 
 export const changeTodoTC = (id, itemCase, task) => (dispatch) => {
-    fetch('/changeTodo', {
-        method: 'POST',
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({id, task})
+    ajax('/api/changeTodo', 'POST', {id, task}).then(data => {
+        if (data.resultCode === 0) dispatch(changeEditing({id, case: itemCase}));
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.resultCode === 0) dispatch(changeEditing({id, case: itemCase}));
-        })
+}
+
+let ajax = (url, method, body = {}) => {
+    let settings = {
+        method,
+        headers: {"X-Requested-With": "XMLHttpRequest", "Content-Type": "application/json"}
+    }
+    if (Object.keys(body).length !== 0) {
+        settings['body'] = JSON.stringify(body)
+    }
+    return fetch(url, settings).then(res => res.json())
 }
 
 export const {

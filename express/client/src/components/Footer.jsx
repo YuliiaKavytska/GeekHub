@@ -17,13 +17,13 @@ const Footer = () => {
             <span className="todo-count"><strong>{countOfActiveTasks}</strong> item left</span>
             <ul className="filters">
                 <li>
-                    <NavLink activeClassName="selected" to='/' exact>All</NavLink>
+                    <NavLink activeClassName="selected" to='/todo'>All</NavLink>
                 </li>
                 <li>
-                    <NavLink activeClassName="selected" to='/active' exact>Active</NavLink>
+                    <NavLink activeClassName="selected" to='/active'>Active</NavLink>
                 </li>
                 <li>
-                    <NavLink activeClassName="selected" to='/completed' exact>Completed</NavLink>
+                    <NavLink activeClassName="selected" to='/completed'>Completed</NavLink>
                 </li>
             </ul>
             <button className="clear-completed"
