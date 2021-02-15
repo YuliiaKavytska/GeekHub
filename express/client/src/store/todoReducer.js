@@ -9,13 +9,15 @@ export const toDoSlice = createSlice({
                 ? JSON.parse(localStorage['lastTodo']) : '',
             countOfActiveTasks: 0,
             filter: 'all',
-            filterResult: []
+            filterResult: [],
+            error: null
         },
     reducers: {
         setTodos: (state, action) => {
             state.list = action.payload.list;
             state.filterResult = action.payload.list;
             state.countOfActiveTasks = action.payload.list.filter(e => e.status === 'active').length;
+            state.error = null;
         },
         changeItemStatus: (state, action) => {
             let element = state.list.findIndex(e => e.id === action.payload.id);
@@ -25,6 +27,7 @@ export const toDoSlice = createSlice({
             state.countOfActiveTasks = state.list.filter(e => e.status === 'active').length;
             state.filterResult = state.list;
             state.filter = 'all';
+            state.error = null;
         },
         changeEditing: (state, action) => {
             let element = state.list.findIndex(e => e.id === action.payload.id);
@@ -38,6 +41,7 @@ export const toDoSlice = createSlice({
             let element = state.list.findIndex(e => e.id === action.payload.id);
             state.list[element].task = action.payload.task;
             state.filterResult = state.list;
+            state.error = null;
         },
         addItem: (state) => {
             if (state.lastTask !== '') {
@@ -48,16 +52,19 @@ export const toDoSlice = createSlice({
                 state.filterResult = state.list;
                 state.filter = 'all';
             }
+            state.error = null;
         },
         deleteItem: (state, action) => {
             state.list = state.list.filter(e => e.id !== action.payload.id);
             state.countOfActiveTasks = state.list.filter(e => e.status === 'active').length;
             state.filterResult = state.list;
             state.filter = 'all';
+            state.error = null;
         },
         deleteCompleted: state => {
             state.list = state.list.filter(e => e.status !== 'completed');
             state.filterResult = state.list;
+            state.error = null;
         },
         changeLastTask: (state, action) => {
             state.lastTask = action.payload.task;
@@ -76,32 +83,34 @@ export const toDoSlice = createSlice({
                 state.countOfActiveTasks = state.list.length;
             }
             state.filterResult = state.list;
+            state.error = null;
         },
         changeFilter: (state, action) => {
             switch (action.payload.filter) {
                 case 'all' :
                     state.filterResult = state.list;
                     state.filter = 'all';
-                    state.countOfActiveTasks = state.list.filter(el => el.status === 'active').length;
                     break;
                 case 'active' :
                     state.filterResult = state.list.filter(el => el.status !== 'completed');
                     state.filter = 'active';
-                    state.countOfActiveTasks = state.list.filter(el => el.status === 'active').length;
                     break;
                 case 'completed' :
                     state.filterResult = state.list.filter(el => el.status !== 'active');
                     state.filter = 'completed';
-                    state.countOfActiveTasks = state.list.filter(el => el.status === 'active').length;
                     break;
                 case 'item' :
                     state.filterResult = state.list.filter(el => el.id === action.payload.id);
                     state.filter = 'all';
-                    state.countOfActiveTasks = state.list.filter(el => el.status === 'active').length;
                     break;
                 default:
                     return;
             }
+            state.countOfActiveTasks = state.list.filter(el => el.status === 'active').length;
+            state.error = null;
+        },
+        setErrorResponse: (state, action) => {
+            state.error = action.payload.error;
         }
     }
 });
@@ -112,43 +121,69 @@ export const getUsersTC = (filter, id = null, editingMode = null) => (dispatch) 
             dispatch(setTodos({list: data.list}));
             dispatch(changeFilter({filter, id}));
             if (editingMode) dispatch(changeEditing({id}))
+        } else {
+            dispatch(setErrorResponse({error: data.message}));
         }
     });
 }
 
 export const completeAllTC = () => (dispatch) => {
     ajax('/api/completeAll', 'GET').then(data => {
-        if (data.resultCode === 0) dispatch(completedAll());
+        if (data.resultCode === 0) {
+            dispatch(completedAll());
+        } else {
+            dispatch(setErrorResponse({error: data.message}));
+        }
     });
 }
 
 export const changeStatusTC = (id) => (dispatch) => {
     ajax('/api/changeTodo', 'PUT', {id}).then(data => {
-        if (data.resultCode === 0) dispatch(changeItemStatus({id}));
+        if (data.resultCode === 0) {
+            dispatch(changeItemStatus({id}));
+        } else {
+            dispatch(setErrorResponse({error: data.message}));
+        }
     });
 }
 
 export const deleteTodoTC = (id) => (dispatch) => {
     ajax('/api/changeTodo', 'DELETE', {id}).then(data => {
-        if (data.resultCode === 0) dispatch(deleteItem({id}))
+        if (data.resultCode === 0) {
+            dispatch(deleteItem({id}));
+        } else {
+            dispatch(setErrorResponse({error: data.message}));
+        }
     })
 }
 
 export const addNewTodoTC = (lastTask) => (dispatch) => {
     ajax('/api/newTodo', 'POST', {task: lastTask}).then(data => {
-        if (data.resultCode === 0) dispatch(addItem());
+        if (data.resultCode === 0) {
+            dispatch(addItem());
+        }  else {
+            dispatch(setErrorResponse({error: data.message}));
+        }
     })
 }
 
 export const deleteCompletedTC = () => (dispatch) => {
     ajax('/api/deleteCompleted', 'DELETE').then(data => {
-        if (data.resultCode === 0) dispatch(deleteCompleted());
+        if (data.resultCode === 0) {
+            dispatch(deleteCompleted());
+        } else {
+            dispatch(setErrorResponse({error: data.message}));
+        }
     })
 }
 
 export const changeTodoTC = (id, itemCase, task) => (dispatch) => {
     ajax('/api/changeTodo', 'POST', {id, task}).then(data => {
-        if (data.resultCode === 0) dispatch(changeEditing({id, case: itemCase}));
+        if (data.resultCode === 0) {
+            dispatch(changeEditing({id, case: itemCase}));
+        } else {
+            dispatch(setErrorResponse({error: data.message}));
+        }
     })
 }
 
@@ -173,5 +208,6 @@ export const {
     deleteCompleted,
     changeLastTask,
     completedAll,
-    changeFilter
+    changeFilter,
+    setErrorResponse
 } = toDoSlice.actions

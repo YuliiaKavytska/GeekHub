@@ -6,13 +6,11 @@ const bodyParser = require("body-parser");
 
 server.use(bodyParser.json());
 
-server.use(bodyParser.urlencoded({extended: true}));
-
 // подключаем дополнительный уровень для роутов (апи)
 server.use('/api', require('./serverApi'))
 
 // статические файлы
-server.use('/', express.static(resolve(__dirname, '..', 'client', 'build')));
+server.use(express.static(resolve(__dirname, '..', 'client', 'build')));
 
 // по всем урлам возвращать статику
 server.get(/.*/, (req, res) => {
