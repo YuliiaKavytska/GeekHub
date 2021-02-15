@@ -8,8 +8,9 @@ router.get("/all", (req, res) => {
         const todoObj = JSON.parse(readData);
         res.json({list: todoObj.list});
     }).catch(err => {
-        returnError(res, err);
-    })
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
+    });
 });
 
 router.get('/completeAll', (req, res) => {
@@ -20,9 +21,13 @@ router.get('/completeAll', (req, res) => {
             ? todoObj.list.map(element => ({...element, status: "completed"}))
             : todoObj.list.map(element => ({...element, status: "active"}));
 
-        writeFile(todoObj).then(() => res.end()).catch(err => returnError(res, err));
+        writeFile(todoObj).then(() => res.end()).catch(err => {
+            console.log(err)
+            res.status(500).json({message: 'Can`t write the file'});
+        });
     }).catch(err => {
-        returnError(res, err);
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
     });
 });
 
@@ -35,9 +40,13 @@ router.put('/changeTodo', (req, res) => {
             ? {...element, status: element.status === "completed" ? "active" : 'completed'}
             : element);
 
-        writeFile(todoObj).then(() => res.end()).catch(err => returnError(res, err));
+        writeFile(todoObj).then(() => res.end()).catch(err => {
+            console.log(err)
+            res.status(500).json({message: 'Can`t write the file'});
+        });
     }).catch(err => {
-        returnError(res, err);
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
     });
 });
 
@@ -48,9 +57,13 @@ router.delete('/changeTodo', (req, res) => {
 
         todoObj['list'] = todoObj.list.filter(el => el.id !== data.id);
 
-        writeFile(todoObj).then(() => res.end()).catch(err => returnError(res, err));
+        writeFile(todoObj).then(() => res.end()).catch(err => {
+            console.log(err)
+            res.status(500).json({message: 'Can`t write the file'});
+        });
     }).catch(err => {
-        returnError(res, err);
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
     });
 })
 
@@ -62,9 +75,13 @@ router.post('/newTodo', (req, res) => {
         const id = todoObj.list.length > 0 ? todoObj.list[todoObj.list.length - 1].id + 1 : 1
         todoObj.list.push({id, task: data.task, status: "active", editing: false});
 
-        writeFile(todoObj).then(() => res.end()).catch(err => returnError(res, err));
+        writeFile(todoObj).then(() => res.end()).catch(err => {
+            console.log(err)
+            res.status(500).json({message: 'Can`t write the file'});
+        });
     }).catch(err => {
-        returnError(res, err);
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
     });
 })
 
@@ -74,9 +91,13 @@ router.delete('/deleteCompleted', (req, res) => {
 
         todoObj['list'] = todoObj.list.filter(e => e.status !== 'completed');
 
-        writeFile(todoObj).then(() => res.end()).catch(err => returnError(res, err));
+        writeFile(todoObj).then(() => res.end()).catch(err => {
+            console.log(err)
+            res.status(500).json({message: 'Can`t write the file'});
+        });
     }).catch(err => {
-        returnError(res, err);
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
     });
 })
 
@@ -90,8 +111,14 @@ router.post('/changeTodo', (req, res) => {
             task: data.task
         } : element)
 
-        writeFile(todoObj).then(() => res.end()).catch(err => returnError(res, err));
-    }).catch(err => returnError(res, err));
+        writeFile(todoObj).then(() => res.end()).catch(err => {
+            console.log(err)
+            res.status(500).json({message: 'Can`t write the file'});
+        });
+    }).catch(err => {
+        console.log(err)
+        res.status(500).json({message: 'Can`t read the file'});
+    });
 })
 
 const readF = () => {
@@ -101,15 +128,6 @@ const readF = () => {
 const writeFile = (todoObj) => {
     todoObj = JSON.stringify(todoObj);
     return  fs.writeFile(resolve(__dirname, 'todo.json'), todoObj);
-}
-
-function returnError(res, err) {
-    console.log('Caught error: ' + err);
-    if (err.code === 'ENOENT') {
-        res.status(500).json({message: 'Can`t read the file'});
-    } else {
-        res.status(500).json({message: 'Can`t write the file'});
-    }
 }
 
 module.exports = router;
