@@ -116,75 +116,98 @@ export const toDoSlice = createSlice({
 });
 
 export const getUsersTC = (filter, id = null, editingMode = null) => (dispatch) => {
-    ajax('/api/all', 'GET').then(data => {
-        if (data.resultCode === 0) {
-            dispatch(setTodos({list: data.list}));
-            dispatch(changeFilter({filter, id}));
-            if (editingMode) dispatch(changeEditing({id}))
+    ajax('/api/all', 'GET').then(response => {
+        const resultPromise = response.json();
+        if (response.status === 200) {
+            resultPromise.then(data => {
+                dispatch(setTodos({list: data.list}));
+                dispatch(changeFilter({filter, id}));
+                if (editingMode) dispatch(changeEditing({id}))
+            })
         } else {
-            dispatch(setErrorResponse({error: data.message}));
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
     });
 }
 
 export const completeAllTC = () => (dispatch) => {
-    ajax('/api/completeAll', 'GET').then(data => {
-        if (data.resultCode === 0) {
+    ajax('/api/completeAll', 'GET').then(response => {
+        if (response.status === 200) {
             dispatch(completedAll());
         } else {
-            dispatch(setErrorResponse({error: data.message}));
+            const resultPromise = response.json();
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
     });
 }
 
 export const changeStatusTC = (id) => (dispatch) => {
-    ajax('/api/changeTodo', 'PUT', {id}).then(data => {
-        if (data.resultCode === 0) {
+    ajax('/api/changeTodo', 'PUT', {id}).then(response => {
+        if (response.status === 200) {
             dispatch(changeItemStatus({id}));
         } else {
-            dispatch(setErrorResponse({error: data.message}));
+            const resultPromise = response.json();
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
     });
 }
 
 export const deleteTodoTC = (id) => (dispatch) => {
-    ajax('/api/changeTodo', 'DELETE', {id}).then(data => {
-        if (data.resultCode === 0) {
+    ajax('/api/changeTodo', 'DELETE', {id}).then(response => {
+        if (response.status === 200) {
             dispatch(deleteItem({id}));
         } else {
-            dispatch(setErrorResponse({error: data.message}));
+            const resultPromise = response.json();
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
-    })
+    });
 }
 
 export const addNewTodoTC = (lastTask) => (dispatch) => {
-    ajax('/api/newTodo', 'POST', {task: lastTask}).then(data => {
-        if (data.resultCode === 0) {
+    ajax('/api/newTodo', 'POST', {task: lastTask}).then(response => {
+        if (response.status === 200) {
             dispatch(addItem());
-        }  else {
-            dispatch(setErrorResponse({error: data.message}));
+        } else {
+            const resultPromise = response.json();
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
-    })
+    });
 }
 
 export const deleteCompletedTC = () => (dispatch) => {
-    ajax('/api/deleteCompleted', 'DELETE').then(data => {
-        if (data.resultCode === 0) {
+    ajax('/api/deleteCompleted', 'DELETE').then(response => {
+        if (response.status === 200) {
             dispatch(deleteCompleted());
         } else {
-            dispatch(setErrorResponse({error: data.message}));
+            const resultPromise = response.json();
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
-    })
+    });
 }
 
 export const changeTodoTC = (id, itemCase, task) => (dispatch) => {
-    ajax('/api/changeTodo', 'POST', {id, task}).then(data => {
-        if (data.resultCode === 0) {
+    ajax('/api/changeTodo', 'POST', {id, task}).then(response => {
+        if (response.status === 200) {
             dispatch(changeEditing({id, case: itemCase}));
         } else {
-            dispatch(setErrorResponse({error: data.message}));
+            const resultPromise = response.json();
+            resultPromise.then(data =>{
+                dispatch(setErrorResponse({error: data.message}));
+            })
         }
-    })
+    });
 }
 
 let ajax = (url, method, body = {}) => {
@@ -195,7 +218,7 @@ let ajax = (url, method, body = {}) => {
     if (Object.keys(body).length !== 0) {
         settings['body'] = JSON.stringify(body)
     }
-    return fetch(url, settings).then(res => res.json())
+    return fetch(url, settings);
 }
 
 export const {
