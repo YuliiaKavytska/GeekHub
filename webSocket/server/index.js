@@ -33,7 +33,7 @@ io.on('connection', socket => {
                 io.emit('newTodo:wasChanged', {success: true, task})
             })
             .catch(err => {
-                io.emit('NEWTODO:CHANGED', {success: false, message: err.message})
+                io.emit('newTodo:wasChanged', {success: false, message: err.message})
             })
     });
 
