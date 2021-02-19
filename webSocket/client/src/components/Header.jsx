@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {addItem, changeLastTask, setErrorResponse} from "../store/todoReducer";
+import {addItem, addNewTodoTC, changeLastTask, setErrorResponse, updateLastMessageTC} from "../store/todoReducer";
 import s from './Header.module.css';
 import socket from "../webSocket";
 
@@ -23,11 +23,11 @@ const Header = () => {
     }, [dispatch]);
 
     const onKey = useCallback(e => {
-        if (e.key === "Enter") socket.emit('newTodo:add', lastTask)
+        if (e.key === "Enter") addNewTodoTC(lastTask);
     }, [dispatch, lastTask]);
 
     const Input = useCallback(e => {
-        socket.emit('newTodo:change', {task: e.target.value});
+        updateLastMessageTC(e.target.value);
     }, [dispatch]);
 
     return <header className={`header ${s.header}`}>

@@ -3,9 +3,14 @@ import {
     changeEditing,
     changeItemStatus,
     changeItemTask,
+    changeStatusTC,
+    changeTodoTC,
+    completeAllTC,
     completedAll,
     deleteItem,
-    getUsersTC, setChangedTask,
+    deleteTodoTC,
+    getUsersTC,
+    setChangedTask,
     setErrorResponse
 } from "../store/todoReducer";
 import {useDispatch, useSelector} from "react-redux";
@@ -59,22 +64,21 @@ const Main = () => {
 
         socket.on('todo:wasChanged', ({success, id, task, ...data}) => {
             success
-                // если прилетает запрос, что кто-то изменил задание, и этот запрос был удачный, тогда мы изменяем задание у нас
                 ? dispatch(setChangedTask({id, task}))
                 : dispatch(setErrorResponse({error: data.message}));
         })
     }, [dispatch]);
 
     const completedAllCall = useCallback(() => {
-        socket.emit('all:complete');
+        completeAllTC();
     }, []);
 
     const deleteItemCall = useCallback((id) => {
-        socket.emit('todo:delete', id);
+        deleteTodoTC(id);
     }, []);
 
     const changeItemStatusCall = useCallback((id) => {
-        socket.emit('todoStatus:change', id);
+        changeStatusTC(id);
     }, []);
 
     const changeEditingCall = useCallback((id, itemCase, task, editing) => {
@@ -82,8 +86,7 @@ const Main = () => {
         // если мы его включаем тогда просто меняем статус редактирования (на влючено)
         //  но если мы его выключаем то тогда мы делаем запрос на изменения данных на сервере (сохранение)
         if (editing) {
-            // посылаем запрос на изменение задания в базе и это изменение получат все
-            socket.emit('todo:change', {id, task});
+            changeTodoTC(id, task);
             // выключаем редактирование у себя
             dispatch(changeEditing({id, case: itemCase}));
         } else {

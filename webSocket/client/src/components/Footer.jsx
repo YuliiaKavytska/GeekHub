@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {deleteCompleted, setErrorResponse} from "../store/todoReducer";
+import {deleteCompleted, deleteCompletedTC, setErrorResponse} from "../store/todoReducer";
 import {NavLink} from "react-router-dom";
 import socket from "../webSocket";
 
@@ -18,7 +18,7 @@ const Footer = () => {
     }, [dispatch]);
 
     const completeAll = useCallback(() => {
-        socket.emit('completed:delete');
+        deleteCompletedTC();
     }, [dispatch]);
 
     return (

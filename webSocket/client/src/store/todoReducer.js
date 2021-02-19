@@ -74,6 +74,7 @@ export const toDoSlice = createSlice({
         },
         changeLastTask: (state, action) => {
             state.lastTask = action.payload.task;
+            state.error = null;
         },
         completedAll: state => {
             if (state.list.every(item => item.status === 'active') ||
@@ -138,14 +139,40 @@ export const getUsersTC = (filter, id = null, editingMode = null) => (dispatch) 
     });
 }
 
+export const updateLastMessageTC = (text) => {
+    ajax('/api/lastTask', 'PUT', {text});
+}
+
+export const completeAllTC = () => {
+    ajax('/api/completeAll', 'GET');
+}
+
+export const changeStatusTC = (id) => {
+    ajax('/api/changeTodo', 'PUT', {id});
+}
+
+export const deleteTodoTC = (id) => {
+    ajax('/api/changeTodo', 'DELETE', {id});
+}
+
+export const addNewTodoTC = (lastTask) => {
+    ajax('/api/newTodo', 'POST', {task: lastTask});
+}
+
+export const deleteCompletedTC = () => {
+    ajax('/api/deleteCompleted', 'DELETE');
+}
+
+export const changeTodoTC = (id, task) => {
+    ajax('/api/changeTodo', 'POST', {id, task});
+}
+
 let ajax = (url, method, body = {}) => {
     let settings = {
         method,
         headers: {"X-Requested-With": "XMLHttpRequest", "Content-Type": "application/json"}
     }
-    if (Object.keys(body).length !== 0) {
-        settings['body'] = JSON.stringify(body)
-    }
+    if (Object.keys(body).length !== 0) settings['body'] = JSON.stringify(body);
     return fetch(url, settings);
 }
 
