@@ -3,8 +3,8 @@ import {FilterType, todoType} from "../types/types"
 
 let initialState = {
     list: [] as Array<todoType>,
-    lastTask: '' as string ,
-    countOfActiveTasks: 0 as number,
+    lastTask: '',
+    countOfActiveTasks: 0,
     filter: 'all' as FilterType,
     filterResult: [] as Array<todoType>,
     error: null as string | null | undefined
@@ -17,47 +17,56 @@ export const toDoSlice = createSlice({
     initialState,
     reducers: {
         setTodos: (state: StateType, action: PayloadAction<{ list: Array<todoType>, lastTask: string }>): void => {
-            state.list = action.payload.list
-            state.lastTask = action.payload.lastTask
-            state.filterResult = action.payload.list
-            state.countOfActiveTasks = action.payload.list.filter((e: todoType) => e.status === 'active').length
+            const {list, lastTask} = action.payload
+            state.list = list
+            state.lastTask = lastTask
+            state.filterResult = list
+            state.countOfActiveTasks = list.filter((e: todoType) => e.status === 'active').length
             state.error = null
         },
         changeItemStatus: (state: StateType, action: PayloadAction<{ id: number }>): void => {
-            let element = state.list.findIndex(e => e.id === action.payload.id)
-            state.list[element].status === 'active'
-                ? state.list[element].status = 'completed'
-                : state.list[element].status = 'active'
+            const element = state.list.findIndex(e => e.id === action.payload.id)
+            if (state.list[element].status === 'active') {
+                state.list[element].status = 'completed'
+            } else {
+                state.list[element].status = 'active'
+            }
             state.countOfActiveTasks = state.list.filter(e => e.status === 'active').length
             state.filterResult = state.list
             state.filter = 'all'
             state.error = null
         },
-        changeEditing: (state: StateType, action: PayloadAction<{ case?: boolean | null, id: number | null }>): void => {
-            let element = state.list.findIndex(e => e.id === action.payload.id)
+        changeEditing: (state: StateType, action: PayloadAction<{ caseType?: boolean, id: number | null }>): void => {
+            const {id, caseType} = action.payload
+            const item = state.list.find(e => e.id === id)
             // рассматриваем случай. мы тыкнули в другом месте или сделали двойной клик?
             // если в другом месте, то это false, а если двойной то нулл
             // если мы тыкнули два раза, тогда мы меняем статус редактирования
             // но если мы тыкнули в другом месте то в этом лучаем мы ВСЕГДА просто ВЫКЛЮЧАЕМ редактирование
-            action.payload.case === false
-                ? state.list[element].editing = false
-                : state.list[element].editing = !state.list[element].editing
+            if (item) {
+                item.editing = caseType && !item.editing
+            }
             state.filterResult = state.list
         },
         setChangedTask: (state: StateType, action: PayloadAction<{ id: number, task: string }>): void => {
-            state.list = state.list.map(e => e.id === action.payload.id ? {...e, task: action.payload.task} : e)
+            const {id, task} = action.payload
+            state.list = state.list.map(e => e.id === id ? {...e, task} : e)
             state.filterResult = state.list
         },
         changeItemTask: (state: StateType, action: PayloadAction<{ id: number, task: string }>): void => {
-            let element = state.list.findIndex(e => e.id === action.payload.id)
-            state.list[element].task = action.payload.task
+            const {id, task} = action.payload
+            const item = state.list.find(e => e.id === id)
+            if (item) {
+                item.task = task
+            }
             state.filterResult = state.list
             state.error = null
         },
         addItem: (state: StateType, action: PayloadAction<{ task: string }>): void => {
-            if (state.lastTask !== '') {
-                let id = state.list.length > 0 ? state.list[state.list.length - 1].id + 1 : 1
-                state.list.push({id: id, task: action.payload.task, status: 'active', editing: false})
+            if (state.lastTask) {
+                let {task} = action.payload
+                const id = state.list.length > 0 ? state.list[state.list.length - 1].id + 1 : 1
+                state.list.push({id, task, status: 'active', editing: false})
                 state.lastTask = ''
                 state.countOfActiveTasks += 1
                 state.filterResult = state.list
@@ -82,8 +91,9 @@ export const toDoSlice = createSlice({
             state.error = null
         },
         completedAll: (state: StateType): void => {
-            if (state.list.every(item => item.status === 'active') ||
-                state.list.some(item => item.status === 'active')) {
+            const foundActive = state.list.every(item => item.status === 'active') ||
+                state.list.some(item => item.status === 'active')
+            if (foundActive) {
                 state.list.forEach((item) => {
                     item.status = 'completed'
                 })
@@ -127,26 +137,25 @@ export const toDoSlice = createSlice({
     }
 })
 
-export const getUsersTC =
-    (filter: FilterType,
-     id: null | number = null,
-     editingMode: boolean | null = null): ThunkAction<void, StateType, unknown, any> =>
-        (dispatch) => {
-            ajax('/api/all', 'GET').then(response => {
-                const resultPromise = response.json()
-                if (response.status === 200) {
-                    resultPromise.then(data => {
-                        dispatch(setTodos({list: data.list, lastTask: data.lastTask}))
-                        dispatch(changeFilter({filter, id}))
-                        if (editingMode) dispatch(changeEditing({id}))
-                    })
-                } else {
-                    resultPromise.then(data => {
-                        dispatch(setErrorResponse({error: data.message}))
-                    })
+export const getUsersTC = (filter: FilterType, id: null | number = null, editingMode: boolean | null = null):
+    ThunkAction<void, StateType, unknown, any> => (dispatch) => {
+    ajax('/api/all', 'GET').then(response => {
+        const resultPromise = response.json()
+        if (response.status === 200) {
+            resultPromise.then(data => {
+                dispatch(setTodos({list: data.list, lastTask: data.lastTask}))
+                dispatch(changeFilter({filter, id}))
+                if (editingMode) {
+                    dispatch(changeEditing({id}))
                 }
             })
+        } else {
+            resultPromise.then(data => {
+                dispatch(setErrorResponse({error: data.message}))
+            })
         }
+    })
+}
 
 export const updateLastMessageTC = (text: string): void => {
     ajax('/api/lastTask', 'PUT', {text})
@@ -190,7 +199,9 @@ let ajax = (url: string, method: HttpMethodsType, body = {}): Promise<Response> 
         method,
         headers: {"X-Requested-With": "XMLHttpRequest", "Content-Type": "application/json"}
     }
-    if (Object.keys(body).length !== 0) settings['body'] = JSON.stringify(body)
+    if (Object.keys(body).length !== 0) {
+        settings['body'] = JSON.stringify(body)
+    }
     return fetch(url, settings)
 }
 

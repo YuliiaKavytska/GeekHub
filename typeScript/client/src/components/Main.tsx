@@ -29,7 +29,7 @@ interface IUri {
 const Main: React.FC<PropsType> = (props) => {
     const {
         filterResult, changeEditing, changeItemStatus, changeItemTask,
-        completedAll, deleteItem, getUsersTC, setChangedTask, setErrorResponse
+        completedAll, deleteItem, setChangedTask, setErrorResponse, getUsersTC
     } = props
 
     const {filter, num, edit} = useParams<IUri>()
@@ -55,27 +55,35 @@ const Main: React.FC<PropsType> = (props) => {
 
     useEffect((): void => {
         socket.on('all:wasCompleted', ({success, ...data}: Omit<mainRespType, 'task' | 'id'>) => {
-            success
-                ? completedAll()
-                : setErrorResponse({error: data.message})
+            if (success) {
+                completedAll()
+            } else {
+                setErrorResponse({error: data.message})
+            }
         })
 
         socket.on('todo:wasDeleted', ({id, success, ...data}: Omit<mainRespType, 'task'>) => {
-            success
-                ? deleteItem({id})
-                : setErrorResponse({error: data.message})
+            if (success) {
+                deleteItem({id})
+            } else {
+                setErrorResponse({error: data.message})
+            }
         })
 
         socket.on('todoStatus:wasChanged', ({id, success, ...data}: Omit<mainRespType, 'task'>) => {
-            success
-                ? changeItemStatus({id})
-                : setErrorResponse({error: data.message})
+            if (success) {
+                changeItemStatus({id})
+            } else {
+                setErrorResponse({error: data.message})
+            }
         })
 
         socket.on('todo:wasChanged', ({success, id, task, ...data}: mainRespType) => {
-            success
-                ? setChangedTask({id, task})
-                : setErrorResponse({error: data.message})
+            if (success) {
+                setChangedTask({id, task})
+            } else {
+                setErrorResponse({error: data.message})
+            }
         })
     }, [])
 
@@ -91,19 +99,17 @@ const Main: React.FC<PropsType> = (props) => {
         changeStatusTC(id)
     }, [])
 
-    const changeEditingCall = useCallback((id: number,
-                                           itemCase: boolean | null,
-                                           task: string,
-                                           editing: boolean): void => {
+    const changeEditingCall = useCallback((id: number, caseType: boolean | undefined,
+                                           task: string, editing: boolean | undefined): void => {
         // мы передаем статус редактирования (editing), чтобы понять, мы его в данный момент выключаем или включаем
         // если мы его включаем тогда просто меняем статус редактирования (на влючено)
         //  но если мы его выключаем то тогда мы делаем запрос на изменения данных на сервере (сохранение)
         if (editing) {
             changeTodoTC(id, task)
             // выключаем редактирование у себя
-            changeEditing({id, case: itemCase})
+            changeEditing({id, caseType})
         } else {
-            changeEditing({id, case: itemCase})
+            changeEditing({id, caseType})
         }
     }, [])
 
@@ -111,55 +117,39 @@ const Main: React.FC<PropsType> = (props) => {
         changeItemTask({id, task})
     }, [])
 
-    return (
-        <section className="main">
-            <input id="toggle-all"
-                   className="toggle-all"
-                   type="checkbox"
-                   onClick={completedAllCall}
-            />
-            <label htmlFor="toggle-all"> Mark all as complete
-            </label>
-            <ul className="todo-list">
-                {filterResult.map((item: todoType) => (
-                    <Item key={item.id}
-                          item={item}
-                          changeEditingCall={changeEditingCall}
-                          changeItemStatusCall={changeItemStatusCall}
-                          deleteItemCall={deleteItemCall}
-                          changeItemTaskCall={changeItemTaskCall}/>
-                ))}
-            </ul>
-        </section>
-    )
+    return <section className="main">
+        <input id="toggle-all"
+               className="toggle-all"
+               type="checkbox"
+               onClick={completedAllCall}
+        />
+        <label htmlFor="toggle-all"> Mark all as complete</label>
+        <ul className="todo-list">
+            {filterResult.map((item: todoType) => (
+                <Item key={item.id}
+                      item={item}
+                      changeEditingCall={changeEditingCall}
+                      changeItemStatusCall={changeItemStatusCall}
+                      deleteItemCall={deleteItemCall}
+                      changeItemTaskCall={changeItemTaskCall}/>
+            ))}
+        </ul>
+    </section>
 }
 
-const mapStateToProps = (state: StateType): StateToProps => ({
+const mapStateToProps = (state: StateType) => ({
     filterResult: state.toDo.filterResult
 })
-type StateToProps = { filterResult: [] | Array<todoType> }
+type StateToProps = ReturnType<typeof mapStateToProps>
 
 const mapDispatchToProps = {
     changeEditing, changeItemStatus, changeItemTask,
-    changeStatusTC, changeTodoTC, completeAllTC, deleteTodoTC, getUsersTC,
-    completedAll, deleteItem, setChangedTask, setErrorResponse
+    completedAll, deleteItem, setChangedTask, setErrorResponse, getUsersTC
 }
 
-type ChangeEditingTypeObj = { case?: boolean | null, id: number | null }
-type changeItemStatusTypeObj = { id: number }
-type changeItemTaskTypeObj = { id: number, task: string }
-type setErrorResponseTypeObj = { error: string | undefined }
+type DispatchToPropsType = Omit<typeof mapDispatchToProps, 'getUsersTC'> &
+    { getUsersTC: (filter: FilterType, id?: number, editingMode?: boolean) => void }
 
-type DispatchToPropsType = {
-    changeEditing: ({}: ChangeEditingTypeObj) => void
-    changeItemStatus: ({}: changeItemStatusTypeObj) => void
-    changeItemTask: ({}: changeItemTaskTypeObj) => void
-    completedAll: () => void
-    deleteItem: ({}: changeItemStatusTypeObj) => void
-    getUsersTC: (filter: FilterType, id?: number, editingMode?: boolean) => void
-    setChangedTask: ({}: changeItemTaskTypeObj) => void
-    setErrorResponse: ({}: setErrorResponseTypeObj) => void
-}
 type PropsType = StateToProps & DispatchToPropsType
 
 export default connect<StateToProps, DispatchToPropsType, null, StateType>(mapStateToProps, mapDispatchToProps)(Main)

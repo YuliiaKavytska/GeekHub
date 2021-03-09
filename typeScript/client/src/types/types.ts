@@ -1,8 +1,8 @@
 export interface todoType {
     id: number
-    task: string | undefined
+    task: string
     status: "active" | "completed"
-    editing: boolean
+    editing: boolean | undefined
 }
 
 export interface mainRespType {

@@ -3,7 +3,7 @@ import {todoType} from "../types/types"
 
 interface PropsType {
     item: todoType
-    changeEditingCall: (id: number, itemCase: boolean | null, task: string, editing: boolean) => void
+    changeEditingCall: (id: number, caseType: boolean | undefined, task: string, editing: boolean | undefined) => void
     changeItemStatusCall: (id: number) => void
     deleteItemCall: (id: number) => void
     changeItemTaskCall: (id: number, task: string) => void
@@ -11,9 +11,10 @@ interface PropsType {
 
 const Item: React.FC<PropsType> = ({item, changeEditingCall, changeItemStatusCall, deleteItemCall, changeItemTaskCall}) => {
     const input = React.createRef<HTMLInputElement>()
+    let currentValue: string = item.task
 
-    const changeEditing = useCallback((e: React.MouseEvent<HTMLInputElement>): void => {
-        changeEditingCall(item.id, null, e.currentTarget.value, item.editing)
+    const changeEditing = useCallback((): void => {
+        changeEditingCall(item.id, true, currentValue, item.editing)
     }, [changeEditingCall, item])
 
     const changeItemStatus = useCallback((): void => {
@@ -26,6 +27,7 @@ const Item: React.FC<PropsType> = ({item, changeEditingCall, changeItemStatusCal
 
     const changeItemTask = useCallback((e: ChangeEvent<HTMLInputElement>): void => {
         changeItemTaskCall(item.id, e.currentTarget.value)
+        currentValue = e.currentTarget.value
     }, [changeItemTaskCall, item])
 
     const changeEditingBlurCase = useCallback((e: React.FocusEvent<HTMLInputElement>): void => {
@@ -34,12 +36,15 @@ const Item: React.FC<PropsType> = ({item, changeEditingCall, changeItemStatusCal
     }, [changeEditingCall, item])
 
     useEffect((): void => {
-        if (input.current) input.current.focus()
+        if (input.current) {
+            input.current.focus()
+        }
     }, [input])
 
     return <li className={item.status === 'completed'
         ? (item.editing ? 'completed editing' : 'completed')
-        : (item.editing ? 'editing' : undefined)}>
+        : (item.editing ? 'editing' : undefined)}
+               onDoubleClick={changeEditing}>
         <div className="view">
             <input className="toggle"
                    type="checkbox"
@@ -54,7 +59,6 @@ const Item: React.FC<PropsType> = ({item, changeEditingCall, changeItemStatusCal
                onInput={changeItemTask}
                onBlur={changeEditingBlurCase}
                ref={input}
-               onDoubleClick={changeEditing}
         />
     </li>
 }

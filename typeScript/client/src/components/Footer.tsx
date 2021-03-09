@@ -7,14 +7,15 @@ import {mainRespType} from '../types/types'
 import {StateType} from "../store"
 
 const Footer: React.FC<PropsType> = (props) => {
-
     let {countOfActiveTasks, deleteCompleted, setErrorResponse} = props
 
     useEffect((): void => {
         socket.on('completed:wasDeleted', ({success, ...data}: Omit<mainRespType, 'id' | 'task'>) => {
-            success
-                ? deleteCompleted()
-                : setErrorResponse({error: data.message})
+            if (success) {
+                deleteCompleted()
+            } else {
+                setErrorResponse({error: data.message})
+            }
         })
     }, [])
 
@@ -44,5 +45,4 @@ type StateToPropsType = ReturnType<typeof mapStateToProps>
 type PropsType = StateToPropsType & DispatchToPropsType
 
 export default connect<StateToPropsType, DispatchToPropsType, null, StateType>(
-    mapStateToProps,
-    mapDispatchToProps)(Footer)
+    mapStateToProps, mapDispatchToProps)(Footer)
