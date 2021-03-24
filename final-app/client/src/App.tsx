@@ -6,25 +6,23 @@ import {connect, Provider} from "react-redux"
 import store, {StoreType} from './store';
 import SignUp from "./components/SignUp/SignUp";
 import Contacts from './components/Contacts/Contacts';
-import Edit from "./components/Edit/Edit";
 import NotFound from './components/404/NotFound';
 import Login from "./components/Login/Login";
 import NewContact from './components/NewContact/NewContact';
 import ShowContainer from "./components/Show/ShowContainer";
 import {initializeAppTC} from "./store/app-reducer";
 import Preloader from "./components/common/Preloader/Preloader";
+import EditContainer from './components/Edit/EditContainer';
 
 const App: React.FC<StateType> = ({initialized, initializeAppTC}) => {
     useEffect(() => {
-        console.log(initialized)
         initializeAppTC()
-        console.log(initialized)
     }, [])
 
     return <div>
         <Header/>
         <main className={'container'}>
-            {!initialized ? <Preloader /> : <Switch>
+            {!initialized ? <Preloader/> : <Switch>
                 <Route path='/' exact render={() => <Login/>}>
                     <Redirect to='/contacts'/>
                 </Route>
@@ -33,7 +31,7 @@ const App: React.FC<StateType> = ({initialized, initializeAppTC}) => {
                 <Route path='/contacts' exact render={() => <Contacts/>}/>
                 <Route path='/newContact' render={() => <NewContact/>}/>
                 <Route path='/show/:id?' render={() => <ShowContainer/>}/>
-                <Route path='/edit/:id?' render={() => <Edit/>}/>
+                <Route path='/edit/:id?' render={() => <EditContainer />}/>
                 <Route path='/*' render={() => <NotFound/>}/>
             </Switch>
             }

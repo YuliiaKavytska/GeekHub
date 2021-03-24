@@ -8,11 +8,14 @@ import AppError from "../common/AppError";
 import {IUser} from "../../types/types";
 import {compose} from "redux";
 import {withAuthRedirect} from "../HOC/withAuthRedirect";
+import {changeFavoriteUserTC} from "../../store/profile-reducer";
 
-const Contacts: React.FC<StateType> = ({profile, error, toggleFavoriteUser}) => {
+const Contacts: React.FC<StateType> = ({profile, error, changeFavoriteUserTC}) => {
     const toggleFavoriteUser = useCallback((id: number, event: boolean) => {
-        toggleFavoriteUser()
+        changeFavoriteUserTC(id, event)
     }, [])
+    const favoriteFilter = profile.contacts.filter(e => profile.favorites?.includes(e.id))
+    const otherContacts = profile.contacts.filter(e => !profile.favorites?.includes(e.id))
 
     return <>
         <div className='mt-3 d-flex align-items-center justify-content-between'>
@@ -22,8 +25,10 @@ const Contacts: React.FC<StateType> = ({profile, error, toggleFavoriteUser}) => 
         {error && <AppError message={error.message} />}
         <div className='my-3'>
             <ul className="list-unstyled list-group col-12 pr-0">
-                {profile.favorites && <FavoriteContacts favorites={profile.favorites} contacts={profile.contacts}/>}
-                <ContactsList contacts={profile.contacts}/>
+                {profile.favorites && <FavoriteContacts favorites={favoriteFilter}
+                                                        toggleFavoriteUser={toggleFavoriteUser}
+                />}
+                <ContactsList contacts={otherContacts} toggleFavoriteUser={toggleFavoriteUser}/>
             </ul>
         </div>
     </>
@@ -34,10 +39,10 @@ const mapState = (state: StoreType) => ({
     error: state.app.error
 })
 const dispatchProps = {
-    toggleFavoriteUser
+    changeFavoriteUserTC
 }
 
-type StateType = ReturnType<typeof mapState> &
+type StateType = ReturnType<typeof mapState> & {changeFavoriteUserTC: (contactId: number, event: boolean) => void}
 
 export default compose<ComponentType>(
     connect(mapState, dispatchProps),

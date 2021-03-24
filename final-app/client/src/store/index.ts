@@ -16,3 +16,6 @@ export type InferActionsTypes<T> = T extends { [key: string]: (...args: any[]) =
 export type BaseThunkType<AT extends Action, P = Promise<void>> = ThunkAction<P, StoreType, unknown, AT>
 
 export default store
+
+// @ts-ignore
+window.store = store.getState()

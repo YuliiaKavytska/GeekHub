@@ -2,15 +2,21 @@ export interface IPhone {
     id: number
     number: string
 }
-export interface IContact {
+
+interface IObjectKeys {
+    [key: string]: string | number | null | Array<IPhone>
+}
+
+export interface IContact extends IObjectKeys {
     id: number
     name: string
-    avatar: string | null
-    email: string | null
-    address: string | null
-    comment: string | null
+    avatar: string
+    email: string
+    address: string
+    comment: string
     phones: Array<IPhone>
 }
+
 export interface IUser {
     id: number
     email: string
@@ -18,7 +24,9 @@ export interface IUser {
     favorites: Array<number> | null
     contacts: Array<IContact>
 }
+
 export interface IError {
     message: string
 }
+
 export type methodsTypes = 'GET' | 'POST' | 'PUT' | 'DELETE'
