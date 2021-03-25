@@ -1,23 +1,25 @@
-import React, {useCallback, useState} from 'react';
+import React, {ChangeEvent, ChangeEventHandler, useCallback, useState} from 'react';
 import anonim from '../../assets/image/anonim.png';
 import {NavLink} from 'react-router-dom';
 import {Field, FieldArray, Form, Formik} from "formik";
-import {IContact, IPhone} from "../../types/types";
+import {IContact, IError, IPhone} from "../../types/types";
 import * as yup from 'yup';
 import FormField from './FormField';
 import {PhoneField} from "./PhoneField";
-import s from './Edit.module.css';
+import AppError from "../common/AppError";
 
 interface IEditForm {
     deleteContact: (id: number) => void
     contact: IContact
     editContact: (data: IContact) => void
+    error: IError | null
 }
 
-const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact}) => {
+const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, error}) => {
+
     const deleteCurrentContact = useCallback(() => {
         deleteContact(contact.id)
-    }, [])
+    }, [deleteContact, contact.id])
 
     const validationSchema = yup.object({
         name: yup.string()
@@ -39,40 +41,42 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact}) => {
 
     const onSubmit = (values: IContact) => {
         editContact(values)
-        console.log(values)
     }
 
-    let [loadedImg, setImg] = useState<any>(null)
+    let [loadedImg, setImg] = useState<null | string>(null)
 
     return <div className='my-4'>
+        {error && <AppError message={error.message}/>}
         <Formik initialValues={contact}
                 validationSchema={validationSchema}
                 onSubmit={onSubmit}
                 className='my-4'>
             {(formProps) => {
+
                 if (typeof formProps.values.avatar !== "string") {
-                    let reader = new FileReader();
+                    const reader = new FileReader();
                     reader.onload = (event) => {
-                        setImg(event.target?.result)
+                        event.target && setImg(event.target.result as string)
                     }
                     reader.readAsDataURL(formProps.values.avatar);
                 }
+
+                const setImgField = (event: ChangeEvent<HTMLInputElement>) => {
+                    formProps.setFieldValue("avatar", event.target.files && event.target.files[0]);
+                }
+
                 return (
                     <Form>
                         <div className="form-group d-flex">
-                            <div className={'overflow-hidden mr-4 ' + s.size} >
-                                <img src={loadedImg || contact.avatar || anonim}
-                                     className="rounded float-left mr-3" width="100%" height="auto"
-                                     alt="..."/>
+                            <div className={'overflow-hidden mr-4 size_edit'}>
+                                <img src={loadedImg || contact.avatar || anonim} width="100%" height="auto"
+                                     className="rounded float-left mr-3" alt=""/>
                             </div>
                             <div>
                                 <label htmlFor="image">Choose photo</label>
-                                <input type="file" name='avatar'
-                                       accept=".jpg, .jpeg, .png" className="form-control-file"
-                                       onChange={(event) => {
-                                           formProps.setFieldValue("avatar", event.target.files && event.target.files[0]);
-                                       }}
-                                       id="image"/>
+                                <input type="file" name='avatar' id="image"
+                                       accept=".jpg, .jpeg" className="form-control-file"
+                                       onChange={setImgField}/>
                             </div>
                         </div>
                         <FormField name='name'/>
@@ -81,11 +85,13 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact}) => {
                             <p className="mr-2 d-inline">Phones</p>
                         </div>
                         <FieldArray name='phones'>
-                            {({push, remove, form: {values: {phones}}}) => {
-                                let length = phones.length
-                                let lastId = phones[length - 1].id
+                            {({push, remove, form}) => {
+                                const {values: {phones}} = form
+                                const length = phones.length
+                                const lastId = phones[length - 1].id
+
                                 return phones.map((e: IPhone, i: number) => {
-                                        let name = `phones[${i}].number`
+                                        const name = `phones[${i}].number`
 
                                         return <Field key={e.id} component={PhoneField} name={name}
                                                       length={length} lastId={lastId}
@@ -104,8 +110,8 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact}) => {
                         <div className="btn-group" role="group" aria-label="Basic example">
                             <NavLink to='/contacts' className="btn btn-info">Cancel</NavLink>
                             <button type="submit" className="btn btn-success">Save</button>
-                            <NavLink to='/contacts' onClick={deleteCurrentContact}
-                                     className="btn btn-danger">Delete</NavLink>
+                            <NavLink to='/contacts' className="btn btn-danger"
+                                     onClick={deleteCurrentContact}>Delete</NavLink>
                         </div>
                     </Form>
                 )

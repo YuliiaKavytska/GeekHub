@@ -1,12 +1,20 @@
 import React, {useCallback} from "react";
-import {getIn} from "formik";
+import {FieldProps, getIn} from "formik";
 import cn from "classnames";
 import {defineOperator} from "./defineOperator";
 
-export const PhoneField = ({field, form: {errors}, push, remove, length, phone}) => {
+type IState = FieldProps & {
+    push: () => void
+    remove: () => void
+    length: number
+    phone: string
+}
+
+export const PhoneField: React.FC<IState> = ({field, form: {errors}, push, remove, length, phone}) => {
+
     const errorMessage = getIn(errors, field.name)
-    let removeCurrentPhone = useCallback(() => remove(), [])
-    let addPhone = useCallback(() => push(), [])
+    let removeCurrentPhone = useCallback(() => remove(), [remove])
+    let addPhone = useCallback(() => push(), [push])
     let operator = defineOperator(phone)
 
     return <div className="form-row">

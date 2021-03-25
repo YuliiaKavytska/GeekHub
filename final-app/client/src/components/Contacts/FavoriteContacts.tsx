@@ -9,13 +9,14 @@ interface IState {
 }
 
 const FavoriteContacts: React.FC<IState> = ({favorites, toggleFavoriteUser}) => {
+
     const deleteFromFavorite = useCallback((id: number) => {
         toggleFavoriteUser(id, false)
-    }, [])
+    }, [toggleFavoriteUser])
 
     return <>
         {favorites.length > 0 && <Favorite/>}
-        {favorites.map(e => <Contact key={e.id} contact={e} toggleFavoriteUser={deleteFromFavorite} />)}
+        {favorites.map(contact => <Contact key={contact.id} contact={contact} toggleFavoriteUser={deleteFromFavorite} />)}
     </>
 }
 

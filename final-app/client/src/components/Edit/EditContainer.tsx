@@ -1,5 +1,5 @@
 import React, {ComponentType, useCallback} from "react";
-import {Redirect, useParams} from "react-router-dom";
+import {Redirect, useHistory, useParams} from "react-router-dom";
 import {ShowErrorTC} from "../../store/app-reducer";
 import {StoreType} from "../../store";
 import {deleteContactTC, editContactDataTC} from "../../store/profile-reducer";
@@ -9,36 +9,46 @@ import {withAuthRedirect} from "../HOC/withAuthRedirect";
 import Edit from "./Edit";
 import {IContact} from "../../types/types";
 
-const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC}) => {
+const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC, editContactDataTC, error}) => {
+
     const deleteContact = useCallback((id: number) => {
         deleteContactTC(id)
-    }, [])
+    }, [deleteContactTC])
+
+    let history = useHistory()
     const editContact = useCallback((data: IContact) => {
-        editContactDataTC(data)
-    }, [])
+        let result = editContactDataTC(data)
+
+        result.then(result => {
+            if (result) {
+                history.push('/contacts')
+            }
+        })
+    }, [editContactDataTC, history])
+
     const param = useParams<{ [key: string]: string }>()
     let contact = contacts?.find(e => e.id === +param.id)
+
     if (!contact) {
         ShowErrorTC({message: 'Sorry, but user wasn`t found'})
         return <Redirect to='/contacts'/>
     }
-    return <Edit contact={contact} deleteContact={deleteContact} editContact={editContact}/>
+    return <Edit contact={contact} deleteContact={deleteContact} editContact={editContact} error={error}/>
 }
 
 const mapState = (state: StoreType) => ({
-    contacts: state.profile.profile?.contacts
+    contacts: state.profile.profile?.contacts,
+    error: state.app.error
 })
 
 const mapDispatch = {
     deleteContactTC,
-    ShowErrorTC,
     editContactDataTC
 }
 
 interface IDispatch {
     deleteContactTC: (id: number) => void
-    ShowErrorTC: (err: string, time: number) => void
-    editContactDataTC: (data: IContact) => void
+    editContactDataTC: (data: IContact) => Promise<boolean>
 }
 
 type StateType = ReturnType<typeof mapState> & IDispatch

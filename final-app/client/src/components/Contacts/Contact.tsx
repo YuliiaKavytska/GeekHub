@@ -14,17 +14,22 @@ interface IState {
 const Contact: React.FC<IState> = ({contact, toggleFavoriteUser}) => {
     const changeFavoriteStatus = useCallback(() => {
         toggleFavoriteUser(contact.id)
-    }, [])
+    }, [toggleFavoriteUser, contact.id])
 
     return <li className="media list-group-item list-group-item-action d-flex align-items-center">
         <NavLink to={'/show/' + contact.id} className="d-flex mr-auto">
-            <img src={contact.avatar || anonim} className="mr-3" width="64" height="64" alt="..."/>
+            <div className={'overflow-hidden mr-4 size_show'}>
+                <img src={contact.avatar || anonim} width="100%" height="auto"
+                     className="rounded float-left mr-3" alt=""/>
+            </div>
         </NavLink>
         <div className="media-body mr-auto">
             <NavLink to={'/show/' + contact.id} className="d-flex mr-auto">
                 <h5 className="mt-0 mb-1">{contact.name}</h5>
             </NavLink>
-            {contact.phones.map(e => <a key={e.id} className="d-block" href={"tel:" + e.number}>{e.number}</a>)}
+            {contact.phones.map(phone =>
+                <a key={phone.id} className="d-block" href={"tel:" + phone.number}>{phone.number}</a>
+            )}
         </div>
         <div className="btn-group" role="group" aria-label="Basic example">
             <a href={"tel:" + contact.phones[0].number} className='btn btn-success'>

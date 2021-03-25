@@ -62,16 +62,15 @@ export const actions = {
 }
 
 export const getUserTC = (id: number): ThunkType<Promise<boolean>> => async (dispatch) => {
-    let response = await ajax('/api/getUser','POST', {id})
-    let jsonResp = await response.json()
+    const response = await ajax('/api/getUser', 'POST', {id})
+    const jsonResp = await response.json()
     if (response.status === 200) {
         const profile = jsonResp.data
         dispatch(actions.setProfile(profile))
-        return Promise.resolve(true)
-    } else {
-        dispatch(ShowErrorTC(jsonResp))
-        return Promise.resolve(false)
+        return true
     }
+    await dispatch(ShowErrorTC(jsonResp))
+    return false
 }
 
 export const changeFavoriteUserTC = (contactId: number, event: boolean): ThunkType => async (dispatch, getState) => {
@@ -87,27 +86,27 @@ export const changeFavoriteUserTC = (contactId: number, event: boolean): ThunkTy
         dispatch(actions.toggleFavoriteUser(contactId, !event))
         if (response.status === 500) {
             const data = await response.json()
-            dispatch(ShowErrorTC(data))
-        } else  {
-            dispatch(ShowErrorTC({message: 'Server error. Something wrong'}))
+            await dispatch(ShowErrorTC(data))
+        } else {
+            await dispatch(ShowErrorTC({message: 'Server error. Something wrong'}))
         }
     }
 }
 
 export const deleteContactTC = (id: number): ThunkType => async (dispatch, getState) => {
-    const userId = getState().profile.profile?.id
     const deletedContact = getState().profile.profile?.contacts.find(e => e.id === id)
     dispatch(actions.deleteContact(id))
-    let response = await ajax('/api/user/contact', 'DELETE', {userId, id})
+    const userId = getState().profile.profile?.id
+    const response = await ajax('/api/user/contact', 'DELETE', {userId, id})
     if (response.status !== 200) {
         if (deletedContact) {
             dispatch(actions.addContact(deletedContact))
         }
         if (response.status === 500) {
             const data = await response.json()
-            dispatch(ShowErrorTC(data))
-        } else  {
-            dispatch(ShowErrorTC({message: 'Server error. Something wrong, user cant be deleted'}))
+            await dispatch(ShowErrorTC(data))
+        } else {
+            await dispatch(ShowErrorTC({message: 'Server error. Something wrong, user cant be deleted'}))
         }
     }
 }
@@ -118,24 +117,42 @@ export const LogOutTC = (): ThunkType => async (dispatch) => {
     localStorage.removeItem('CA/userID')
 }
 
-export const editContactDataTC = (data: IContact): ThunkType => async (dispatch, getState) => {
-    const userId = getState().profile.profile?.id
+export const editContactDataTC = (data: IContact<string | File>): ThunkType<Promise<boolean>> => async (dispatch, getState) => {
     const currentContactState = getState().profile.profile?.contacts.find(e => e.id === data.id);
-    dispatch(actions.editUserData(data))
-    let response = await ajax('/api/user/contact/edit', 'PUT', {userId, contact: data})
-    if (response.status !== 200) {
-        dispatch(actions.editUserData(currentContactState as IContact))
-        if (response.status === 500) {
-            const data = await response.json()
-            dispatch(ShowErrorTC(data))
-        } else  {
-            dispatch(ShowErrorTC({message: 'Server error. Something wrong, user`s info can`t be changed'}))
+
+    let formData = new FormData();
+    for (let key in data) {
+        if (data.hasOwnProperty(key) && typeof data[key] !== 'string' && key !== 'avatar') {
+            formData.append(key, JSON.stringify(data[key]))
+        } else {
+            formData.append(key, data[key])
         }
     }
+    const userId = getState().profile.profile?.id
+    if (userId) {
+        formData.append('userId', userId.toString())
+    }
+
+    if (typeof data.avatar === 'object') {
+        data.avatar = '/' + data.avatar.name
+    }
+    dispatch(actions.editUserData(data as IContact))
+
+    let response = await fetch('/api/user/contact/edit', {method: "POST", body: formData})
+    if (response.status === 200) return true
+
+    dispatch(actions.editUserData(currentContactState as IContact))
+    if (response.status === 500) {
+        const data = await response.json()
+        await dispatch(ShowErrorTC(data))
+    } else {
+        await dispatch(ShowErrorTC({message: 'Server error. Something wrong, user`s info can`t be changed'}))
+    }
+    return false
 }
 
 const ajax = (url: string, method: methodsTypes, body = {}): Promise<any> => {
-    let settings: any = {
+    let settings: ISettings = {
         method,
         headers: {
             "X-Requested-With": "XMLHttpRequest",
@@ -146,7 +163,13 @@ const ajax = (url: string, method: methodsTypes, body = {}): Promise<any> => {
     if (Object.keys(body).length > 0) {
         settings["body"] = JSON.stringify(body)
     }
-    return fetch( url, settings)
+    return fetch(url, settings)
+}
+
+interface  ISettings {
+    [key: string]: string | object
+    headers: {[key: string]: string}
+    method: methodsTypes
 }
 
 type StateType = typeof initialState

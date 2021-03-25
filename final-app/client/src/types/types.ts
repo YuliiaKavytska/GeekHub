@@ -3,14 +3,11 @@ export interface IPhone {
     number: string
 }
 
-interface IObjectKeys {
-    [key: string]: string | number | null | Array<IPhone>
-}
-
-export interface IContact extends IObjectKeys {
+export type IContact<A = string> = {
+    [key: string]: any
     id: number
     name: string
-    avatar: string
+    avatar: A
     email: string
     address: string
     comment: string

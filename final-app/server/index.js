@@ -8,12 +8,10 @@ server.use(bodyParser.json())
 
 server.use('/api', require('./serverApi'))
 
-// server.use(express.static(resolve(__dirname, '..', 'client', 'build')))
-//
-// server.get(/.*/, (req, res) => {
-//     res.sendFile(resolve(__dirname, '..', 'build', 'client', 'index.html'))
-// })
+server.use(express.static(resolve(__dirname, 'public', 'uploads')));
 
 server.listen(port, () => {
     console.log('Server is on at port: ' + port)
 })
+
+

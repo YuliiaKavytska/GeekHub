@@ -3,6 +3,25 @@ const router = Router();
 const {resolve} = require('path');
 const fs = require('fs/promises');
 
+const multer = require('multer')
+
+const fileStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            cb(null, true);
+        } else {
+            cb(null, false);
+        }
+    }
+})
+const upload = multer({storage: fileStorage}).single('avatar')
+
 router.post('/getUser', (req, res) => {
     readContacts()
         .then(readData => {
@@ -15,6 +34,7 @@ router.post('/getUser', (req, res) => {
             if (!user) {
                 throw new Error('User doesnt exist')
             }
+
             res.json({data: user})
         })
         .catch(err => res.status(500).json({message: err.message}))
@@ -67,14 +87,28 @@ router.delete('/user/contact', (req, res) => {
         .catch(err => res.status(500).json({message: err.message}))
 })
 
-router.put('/user/contact/edit', (req, res) => {
+router.post('/user/contact/edit', upload, (req, res) => {
     readContacts()
         .then(readData => {
-            const users = JSON.parse(readData)
-            let {userId, data} = req.body
+            let users = JSON.parse(readData)
+            let {file, body: {userId, ...contactInfo}} = req
+
+            contactInfo.id = JSON.parse(contactInfo.id)
+
+            if (file) {
+                contactInfo.avatar = '/' + file.originalname
+            }
+            contactInfo.phones = JSON.parse(contactInfo.phones)
+
+            const user = findUser(users, +userId);
+            const contactIndex = user.contacts.findIndex(e => e.id === contactInfo.id)
+            user.contacts[contactIndex] = contactInfo
+            return writeFile(users)
         })
+        .then(() => res.end())
         .catch(err => res.status(500).json({message: err.message}))
 })
+
 
 function findUser(arr, id) {
     return arr.find(e => e.id === id)
@@ -85,7 +119,7 @@ function writeFile(obj) {
 }
 
 function readContacts() {
-    return  fs.readFile(resolve(__dirname, 'contacts.json'))
+    return fs.readFile(resolve(__dirname, 'contacts.json'))
 }
 
 module.exports = router

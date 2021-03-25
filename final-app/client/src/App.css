@@ -1,4 +1,19 @@
-img {
+/*img {*/
+/*    border-radius: 50%;*/
+/*    overflow: hidden;*/
+/*}*/
+
+.size_edit {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    overflow: hidden;
+}
+.size_show {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+}
+.size_show_page {
+    width: 200px;
+    height: 200px;
 }

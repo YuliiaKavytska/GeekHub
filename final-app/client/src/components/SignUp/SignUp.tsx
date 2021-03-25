@@ -1,22 +1,21 @@
 import React, {useEffect} from 'react';
-import {NavLink} from "react-router-dom";
+import {NavLink, Redirect} from "react-router-dom";
 import AppError from "../common/AppError";
 import {StoreType} from "../../store";
 import {ShowErrorTC} from "../../store/app-reducer";
 import {IError} from "../../types/types";
 import {connect} from "react-redux";
+import HelloCard from "../common/HelloCard";
 
-const SignUp: React.FC<StateType> = ({error, ShowErrorTC}) => {
-    useEffect(() => {
-        ShowErrorTC({message: 'something'}, 4000)
-    }, [ShowErrorTC])
+const SignUp: React.FC<StateType> = ({error, ShowErrorTC, isAuth}) => {
+    // useEffect(() => {
+    //     ShowErrorTC({message: 'something'}, 4000)
+    // }, [ShowErrorTC])
+
+    if (isAuth) return <Redirect to='/contacts' />
 
     return <div className="mt-4">
-        <div>
-            <h1 className="display-4">Hello! This is Sign Up.</h1>
-            <p className="lead">This is a simple contacts APP. Authorize or create an account to use all possibility</p>
-            <hr className="my-4" />
-        </div>
+        <HelloCard title='Sign Up' />
         {error && <AppError message={error.message} />}
         <form className={'py-3'}>
             <div className="form-group">
@@ -38,13 +37,14 @@ const SignUp: React.FC<StateType> = ({error, ShowErrorTC}) => {
             </div>
             <button type="submit" className="btn btn-primary">Log In</button>
         </form>
-        <div className="dropdown-divider"></div>
+        <hr />
         <NavLink to='/login' className="dropdown-item">Have an account? Log in</NavLink>
     </div>
 }
 
 const mapState = (state: StoreType) => ({
-    error: state.app.error
+    error: state.app.error,
+    isAuth: state.app.isAuth
 })
 const dispatchState = {
     ShowErrorTC
