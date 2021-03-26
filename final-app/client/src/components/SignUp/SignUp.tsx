@@ -1,43 +1,56 @@
-import React, {useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {NavLink, Redirect} from "react-router-dom";
 import AppError from "../common/AppError";
 import {StoreType} from "../../store";
-import {ShowErrorTC} from "../../store/app-reducer";
-import {IError} from "../../types/types";
+import {initializeAppTC, RegisterTC} from "../../store/app-reducer";
+import {IRegisterDate} from "../../types/types";
 import {connect} from "react-redux";
 import HelloCard from "../common/HelloCard";
+import {Form, Formik} from 'formik';
+import * as yup from 'yup';
+import FormField from "../Edit/FormField";
 
-const SignUp: React.FC<StateType> = ({error, ShowErrorTC, isAuth}) => {
-    // useEffect(() => {
-    //     ShowErrorTC({message: 'something'}, 4000)
-    // }, [ShowErrorTC])
+const SignUp: React.FC<StateType> = ({error, RegisterTC, isAuth, initializeAppTC}) => {
 
-    if (isAuth) return <Redirect to='/contacts' />
+    let SignupSchema = yup.object({
+        name: yup.string()
+            .min(3)
+            .matches(/^[a-zа-щієїґюьяыёъ\s]+$/i, 'Field should contain only characters')
+            .required('Name is requires'),
+        email: yup.string().trim().email('Invalid email').required('Login is required'),
+        password: yup.string()
+            .trim()
+            .min(8)
+            .max(50)
+            .matches(/\d+/, 'Password should include one number')
+            .matches(/[a-zа-щієїґюьяыёъ]+/, 'Password should include one lowercase later')
+            .matches(/[A-ZА-ЩІЄЇҐЮЬЯЫЁЪ]+/, 'Password should include one uppercase later')
+            .required('Password is required')
+    })
+    const onSubmit = useCallback((values) => {
+        let result = RegisterTC(values)
+        result
+            .then(value => {
+                if (value) initializeAppTC()
+            })
+    }, [RegisterTC, initializeAppTC])
+
+    if (isAuth) return <Redirect to='/contacts'/>
 
     return <div className="mt-4">
-        <HelloCard title='Sign Up' />
-        {error && <AppError message={error.message} />}
-        <form className={'py-3'}>
-            <div className="form-group">
-                <label htmlFor="exampleDropdownFormEmail1">Email address</label>
-                <input type="email" className="form-control" id="exampleDropdownFormEmail1"
-                       placeholder="email@example.com"/>
-                <small id="emailHelp" className="form-text text-muted">We'll never share your email with anyone
-                    else.</small>
-            </div>
-            <div className="form-group">
-                <label htmlFor="exampleDropdownFormEmail1">Name and Surname</label>
-                <input type="email" className="form-control" id="exampleDropdownFormEmail1"
-                       placeholder="Anatoliy Anatoliev"/>
-            </div>
-            <div className="form-group">
-                <label htmlFor="exampleDropdownFormPassword1">Password</label>
-                <input type="password" className="form-control" id="exampleDropdownFormPassword1"
-                       placeholder="Password"/>
-            </div>
-            <button type="submit" className="btn btn-primary">Log In</button>
-        </form>
-        <hr />
+        <HelloCard title='Sign Up'/>
+        {error && <AppError message={error.message}/>}
+        <Formik initialValues={{name: '', email: '', password: ''}}
+                validationSchema={SignupSchema}
+                onSubmit={onSubmit}>
+            <Form className={'py-3'}>
+                <FormField name='name'/>
+                <FormField name='email'/>
+                <FormField name='password' type='password'/>
+                <button type="submit" className="btn btn-primary">Sign Up</button>
+            </Form>
+        </Formik>
+        <hr/>
         <NavLink to='/login' className="dropdown-item">Have an account? Log in</NavLink>
     </div>
 }
@@ -47,9 +60,15 @@ const mapState = (state: StoreType) => ({
     isAuth: state.app.isAuth
 })
 const dispatchState = {
-    ShowErrorTC
+    RegisterTC,
+    initializeAppTC
 }
 
-type StateType = ReturnType<typeof mapState> & {ShowErrorTC: (err: IError, time?: number) => void}
+interface IDispatch {
+    RegisterTC: (data: IRegisterDate) => Promise<boolean>
+    initializeAppTC: () => void
+}
+
+type StateType = ReturnType<typeof mapState> & IDispatch
 
 export default connect(mapState, dispatchState)(SignUp)

@@ -16,8 +16,8 @@ const Contacts: React.FC<StateType> = ({profile, error, changeFavoriteUserTC}) =
         changeFavoriteUserTC(id, event)
     }, [changeFavoriteUserTC])
 
-    const favoriteFilter = profile.contacts.filter(contact => profile.favorites?.includes(contact.id))
-    const otherContacts = profile.contacts.filter(contact => !profile.favorites?.includes(contact.id))
+    const favoriteFilter = profile.contacts?.filter(contact => profile.favorites?.includes(contact.id))
+    const otherContacts = profile.contacts?.filter(contact => !profile.favorites?.includes(contact.id))
 
     return <>
         <div className='mt-3 d-flex align-items-center justify-content-between'>
@@ -27,9 +27,9 @@ const Contacts: React.FC<StateType> = ({profile, error, changeFavoriteUserTC}) =
         {error && <AppError message={error.message}/>}
         <div className='my-3'>
             <ul className="list-unstyled list-group col-12 pr-0">
-                {profile.favorites && <FavoriteContacts favorites={favoriteFilter}
+                {favoriteFilter && <FavoriteContacts favorites={favoriteFilter}
                                                         toggleFavoriteUser={toggleFavoriteUser}/>}
-                <ContactsList contacts={otherContacts} toggleFavoriteUser={toggleFavoriteUser}/>
+                {otherContacts && <ContactsList contacts={otherContacts} toggleFavoriteUser={toggleFavoriteUser}/>}
             </ul>
         </div>
     </>

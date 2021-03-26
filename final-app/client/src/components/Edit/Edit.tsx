@@ -1,4 +1,4 @@
-import React, {ChangeEvent, ChangeEventHandler, useCallback, useState} from 'react';
+import React, {ChangeEvent, useCallback, useState} from 'react';
 import anonim from '../../assets/image/anonim.png';
 import {NavLink} from 'react-router-dom';
 import {Field, FieldArray, Form, Formik} from "formik";
@@ -9,38 +9,45 @@ import {PhoneField} from "./PhoneField";
 import AppError from "../common/AppError";
 
 interface IEditForm {
-    deleteContact: (id: number) => void
+    deleteContact?: (id: number) => void
     contact: IContact
-    editContact: (data: IContact) => void
+    editContact?: (data: IContact) => void
+    newContactTC?: (data: IContact) => void
     error: IError | null
 }
 
-const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, error}) => {
+const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newContactTC, error}) => {
 
     const deleteCurrentContact = useCallback(() => {
-        deleteContact(contact.id)
+        if (deleteContact) {
+            deleteContact(contact.id)
+        }
     }, [deleteContact, contact.id])
 
     const validationSchema = yup.object({
         name: yup.string()
-            .trim()
-            .matches(/^[а-щієїґюьяa-z\s]+$/i, 'Field should contain only characters')
+            .matches(/^[a-zа-щієїґюьяыёъ\s]+$/i, 'Field should contain only characters')
             .min(3)
+            .max(100, 'Too Long!')
             .required('Name field is required'),
-        email: yup.string().email('Incorrect email'),
+        email: yup.string().max(100, 'Too Long!').email('Incorrect email'),
         phones: yup.array().of(
             yup.object().shape({
                 id: yup.number(),
                 number: yup.string()
                     .trim()
                     .matches(/^(\+38)?0(93|63|67|68|96|97|98|50|66|95|99)\d{7}$/, 'Incorrect phone number')
-                    .required('At least one phone should exist, field is required')
+                    .required('Field is required')
             })
         )
     })
 
     const onSubmit = (values: IContact) => {
-        editContact(values)
+        if (editContact) {
+            editContact(values)
+        } else if (newContactTC) {
+            newContactTC(values)
+        }
     }
 
     let [loadedImg, setImg] = useState<null | string>(null)
@@ -95,7 +102,7 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, error})
 
                                         return <Field key={e.id} component={PhoneField} name={name}
                                                       length={length} lastId={lastId}
-                                                      phone={e.number}
+                                                      phone={e.number} i={i}
                                                       push={() => push({id: lastId + 1, number: ''})}
                                                       remove={() => remove(i)}/>
                                     }
@@ -110,8 +117,8 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, error})
                         <div className="btn-group" role="group" aria-label="Basic example">
                             <NavLink to='/contacts' className="btn btn-info">Cancel</NavLink>
                             <button type="submit" className="btn btn-success">Save</button>
-                            <NavLink to='/contacts' className="btn btn-danger"
-                                     onClick={deleteCurrentContact}>Delete</NavLink>
+                            {deleteContact && <NavLink to='/contacts' className="btn btn-danger"
+                                                       onClick={deleteCurrentContact}>Delete</NavLink>}
                         </div>
                     </Form>
                 )

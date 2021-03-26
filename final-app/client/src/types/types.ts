@@ -18,12 +18,18 @@ export interface IUser {
     id: number
     email: string
     name: string
-    favorites: Array<number> | null
-    contacts: Array<IContact>
+    favorites: Array<number> | null | undefined
+    contacts: Array<IContact> | null
 }
 
 export interface IError {
     message: string
+}
+
+export interface IRegisterDate {
+    name: string
+    email: string
+    password: string
 }
 
 export type methodsTypes = 'GET' | 'POST' | 'PUT' | 'DELETE'

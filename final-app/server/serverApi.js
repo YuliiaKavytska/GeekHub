@@ -5,6 +5,9 @@ const fs = require('fs/promises');
 
 const multer = require('multer')
 
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 const fileStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'public/uploads')
@@ -13,7 +16,7 @@ const fileStorage = multer.diskStorage({
         cb(null, file.originalname)
     },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
             cb(null, true);
         } else {
             cb(null, false);
@@ -22,22 +25,108 @@ const fileStorage = multer.diskStorage({
 })
 const upload = multer({storage: fileStorage}).single('avatar')
 
-router.post('/getUser', (req, res) => {
-    readContacts()
-        .then(readData => {
-            const users = JSON.parse(readData)
-            const {body: {id}} = req
+router.post('/getUser', async (req, res) => {
+    try {
+        const readData = await readContacts()
+        const users = JSON.parse(readData)
+        const {body: {email, password}} = req
+    
+        let user = findUser(users, email, 'email')
 
-            let user = findUser(users, id)
+        if (!user) {
+            throw new Error('User doesnt exist')
+        }
+
+        if (await bcrypt.compare(password, user.password)) {
             delete user.password
-
-            if (!user) {
-                throw new Error('User doesnt exist')
-            }
-
             res.json({data: user})
-        })
-        .catch(err => res.status(500).json({message: err.message}))
+        } else {
+            throw new Error('Login or password is wrong')
+        }
+    } catch (err) {
+        res.status(500).json({message: err.message})
+
+    }
+    // readContacts()
+    //     .then(readData => {
+    //         const users = JSON.parse(readData)
+    //         const {body: {email, password}} = req
+    //         console.log(req.body)
+    //         let user = findUser(users, email, 'email')
+    //         console.log(user)
+    //         if (!user) {
+    //             throw new Error('User doesnt exist')
+    //         }
+    //
+    //         bcrypt.compare(password, user.password).then(result => {
+    //             if (result) {
+    //                 delete user.password
+    //                 res.json({data: user})
+    //             } else {
+    //                 throw new Error('Login or password is wrong')
+    //             }
+    //         }).catch((err) => {
+    //             console.log('error bycrypt')
+    //             res.status(500).json({message: err.message})
+    //         })
+    //     })
+    //     .catch((err) => res.status(500).json({message: err.message}))
+})
+
+router.post('/register', async (req, res) => {
+    try {
+        const readData = await readContacts()
+        const users = JSON.parse(readData)
+        const {body: {email, password, name}} = req
+        const user = findUser(users, email, 'email')
+        if (user) {
+            throw new Error(`User with email: ${email} already exist. Log In, please`)
+        }
+        let newUser = {
+            id: users[users.length - 1].id + 1,
+            name,
+            email,
+            favorites: null,
+            contacts: null
+        }
+        const hashedPassword = await bcrypt.hash(password, saltRounds)
+        newUser.password = hashedPassword
+        users.push(newUser)
+
+        await writeFile(users)
+        res.end()
+    } catch (err) {
+        console.log('error reg')
+        res.status(500).json({message: err.message})
+    }
+    // readContacts()
+    //     .then(readData => {
+    //         const users = JSON.parse(readData)
+    //         const {body: {email, password, name}} = req
+    //         const user = findUser(users, email, 'email')
+    //         if (user) {
+    //             throw new Error(`User with email: ${email} already exist. Log In, please`)
+    //         }
+    //         let newUser = {
+    //             id: users[users.length - 1].id + 1,
+    //             name,
+    //             email,
+    //             favorites: null,
+    //             contacts: null
+    //         }
+    //         bcrypt.hash(password, saltRounds).then(hashedPassword => {
+    //             newUser.password = hashedPassword
+    //             users.push(newUser)
+    //
+    //             return writeFile(users).then(() => res.end())
+    //         }).catch((err) => {
+    //             console.log('error bycrypt')
+    //             res.status(500).json({message: err.message})
+    //         })
+    //     }).catch((err) => {
+    //     console.log('error reg')
+    //     res.status(500).json({message: err.message})
+    // })
 })
 
 router.put('/user/favorite', (req, res) => {
@@ -109,9 +198,32 @@ router.post('/user/contact/edit', upload, (req, res) => {
         .catch(err => res.status(500).json({message: err.message}))
 })
 
+router.post('/user/contact/new', upload, (req, res) => {
+    readContacts()
+        .then(readData => {
+            let users = JSON.parse(readData)
+            let {file, body: {userId, ...contactInfo}} = req
+            let user = findUser(users, +userId)
 
-function findUser(arr, id) {
-    return arr.find(e => e.id === id)
+            contactInfo.id = JSON.parse(contactInfo.id)
+            if (file) {
+                contactInfo.avatar = '/' + file.originalname
+            }
+            contactInfo.phones = JSON.parse(contactInfo.phones)
+            if (user.contacts) {
+                user.contacts.push(contactInfo)
+            } else {
+                user.contacts = [contactInfo]
+            }
+
+            return writeFile(users)
+        })
+        .then(() => res.end())
+        .catch(err => res.status(500).json({message: err.message}))
+})
+
+function findUser(arr, prop, propName = 'id') {
+    return arr.find(element => element[propName] === prop)
 }
 
 function writeFile(obj) {

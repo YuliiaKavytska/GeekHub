@@ -1,6 +1,7 @@
 import {BaseThunkType, InferActionsTypes} from "."
-import {IError} from "../types/types"
+import {IError, IRegisterDate} from "../types/types"
 import {getUserTC} from "./profile-reducer"
+import {ajax} from "./commonFunktion";
 
 let initialState = {
     initialized: false,
@@ -15,11 +16,6 @@ const appReducer = (state = initialState, action: ActionsType): StateType => {
             return {
                 ...state,
                 initialized: action.event
-            }
-        case "CA/APP/TOGGLE_FETCHING":
-            return {
-                ...state,
-                isFetching: action.event
             }
         case "CA/APP/SET_ERROR":
             return {
@@ -38,23 +34,45 @@ const appReducer = (state = initialState, action: ActionsType): StateType => {
 
 export const actions = {
     setInitialized: (event: boolean) => ({type: 'CA/APP/SET_INITIALIZED', event} as const),
-    toggleFetching: (event: boolean) => ({type: 'CA/APP/TOGGLE_FETCHING', event} as const),
     setError: (err: IError | null) => ({type: 'CA/APP/SET_ERROR', err} as const),
     setAuthorized: (event: boolean) => ({type: 'CA/PROFILE/SET_AUTHORIZED', event} as const)
 }
 
 export const initializeAppTC = (): ThunkType => async (dispatch, getState) => {
-    if (!getState().app.initialized) {
-        let storage = localStorage.getItem('CA/userID')
-        if (storage) {
-            let id = JSON.parse(storage)
-            let response = await dispatch(getUserTC(id))
+    let storage = localStorage.getItem('CA/user')
+    if (storage) {
+        let userData = JSON.parse(storage)
+        if (userData.hasOwnProperty('email') && userData.hasOwnProperty('password')) {
+            console.log(userData)
+            let response = await dispatch(getUserTC(userData))
+            console.log(response)
             if (response) {
                 dispatch(actions.setAuthorized(true))
             }
+        } else {
+            await dispatch(ShowErrorTC({message: 'Your data is incorrect. Log In with correct login and password'}))
         }
     }
-    dispatch(actions.setInitialized(true))
+    if (!getState().app.initialized) dispatch(actions.setInitialized(true))
+
+}
+
+export const RegisterTC = (data: IRegisterDate): ThunkType<Promise<boolean>> => async (dispatch) => {
+    await localStorage.setItem('CA/user', JSON.stringify({email: data.email, password: data.password}))
+    let response = await ajax('/api/register', 'POST', data)
+
+    if (response.status === 200) {
+        return true
+    } else {
+        let data = await response.json()
+        await dispatch(ShowErrorTC(data))
+        return false
+    }
+}
+
+export const LogInTC = (data: { email: string, password: string }): ThunkType => async (dispatch) => {
+    localStorage.setItem('CA/user', JSON.stringify({email: data.email, password: data.password}))
+    await dispatch(initializeAppTC())
 }
 
 export const ShowErrorTC = (err: IError, time: number = 3000): ThunkType => async (dispatch) => {
@@ -64,5 +82,5 @@ export const ShowErrorTC = (err: IError, time: number = 3000): ThunkType => asyn
 
 type StateType = typeof initialState
 export type ActionsType = InferActionsTypes<typeof actions>
-type ThunkType = BaseThunkType<ActionsType>
+type ThunkType<T = Promise<void>> = BaseThunkType<ActionsType, T>
 export default appReducer
