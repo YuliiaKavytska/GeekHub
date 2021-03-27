@@ -1,7 +1,7 @@
-import React, {ComponentType} from 'react';
-import {connect} from "react-redux";
-import {Redirect} from 'react-router-dom';
-import {StoreType} from "../../store";
+import React, {ComponentType} from 'react'
+import {connect} from "react-redux"
+import {Redirect} from 'react-router-dom'
+import {StoreType} from "../../store"
 
 const mapState = (state: StoreType) => ({
     isAuth: state.app.isAuth

@@ -1,6 +1,6 @@
-import React from "react";
-import StarIcon from "../common/StarIcon";
-import UsersIcon from "../common/UsersIcon";
+import React from "react"
+import StarIcon from "../common/StarIcon"
+import UsersIcon from "../common/UsersIcon"
 
 export const Favorite: React.FC = () => {
     return <li className="media list-group-item list-group-item-warning">

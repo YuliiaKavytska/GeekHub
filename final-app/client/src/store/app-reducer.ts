@@ -1,7 +1,7 @@
 import {BaseThunkType, InferActionsTypes} from "."
-import {IError, IRegisterDate} from "../types/types"
+import {IError, ILogin, IRegisterData} from "../types/types"
 import {getUserTC} from "./profile-reducer"
-import {ajax} from "./commonFunktion";
+import {ajax} from "./commonFunktion"
 
 let initialState = {
     initialized: false,
@@ -15,7 +15,7 @@ const appReducer = (state = initialState, action: ActionsType): StateType => {
         case "CA/APP/SET_INITIALIZED":
             return {
                 ...state,
-                initialized: action.event
+                initialized: true
             }
         case "CA/APP/SET_ERROR":
             return {
@@ -33,19 +33,18 @@ const appReducer = (state = initialState, action: ActionsType): StateType => {
 }
 
 export const actions = {
-    setInitialized: (event: boolean) => ({type: 'CA/APP/SET_INITIALIZED', event} as const),
+    setInitialized: () => ({type: 'CA/APP/SET_INITIALIZED'} as const),
     setError: (err: IError | null) => ({type: 'CA/APP/SET_ERROR', err} as const),
     setAuthorized: (event: boolean) => ({type: 'CA/PROFILE/SET_AUTHORIZED', event} as const)
 }
 
 export const initializeAppTC = (): ThunkType => async (dispatch, getState) => {
-    let storage = localStorage.getItem('CA/user')
+    let storage = await localStorage.getItem('CA/user')
     if (storage) {
         let userData = JSON.parse(storage)
         if (userData.hasOwnProperty('email') && userData.hasOwnProperty('password')) {
-            console.log(userData)
             let response = await dispatch(getUserTC(userData))
-            console.log(response)
+
             if (response) {
                 dispatch(actions.setAuthorized(true))
             }
@@ -53,25 +52,24 @@ export const initializeAppTC = (): ThunkType => async (dispatch, getState) => {
             await dispatch(ShowErrorTC({message: 'Your data is incorrect. Log In with correct login and password'}))
         }
     }
-    if (!getState().app.initialized) dispatch(actions.setInitialized(true))
-
-}
-
-export const RegisterTC = (data: IRegisterDate): ThunkType<Promise<boolean>> => async (dispatch) => {
-    await localStorage.setItem('CA/user', JSON.stringify({email: data.email, password: data.password}))
-    let response = await ajax('/api/register', 'POST', data)
-
-    if (response.status === 200) {
-        return true
-    } else {
-        let data = await response.json()
-        await dispatch(ShowErrorTC(data))
-        return false
+    if (!getState().app.initialized) {
+        dispatch(actions.setInitialized())
     }
 }
 
-export const LogInTC = (data: { email: string, password: string }): ThunkType => async (dispatch) => {
-    localStorage.setItem('CA/user', JSON.stringify({email: data.email, password: data.password}))
+export const RegisterTC = (data: IRegisterData): ThunkType => async (dispatch) => {
+    let response = await ajax('/api/signUp', 'POST', data)
+    if (response.status === 200) {
+        localStorage.setItem('CA/user', JSON.stringify({email: data.email, password: data.password}))
+        await dispatch(initializeAppTC())
+    } else {
+        let data = await response.json()
+        await dispatch(ShowErrorTC(data))
+    }
+}
+
+export const LogInTC = (data: ILogin): ThunkType => async (dispatch) => {
+    localStorage.setItem('CA/user', JSON.stringify(data))
     await dispatch(initializeAppTC())
 }
 

@@ -18,7 +18,7 @@ export interface IUser {
     id: number
     email: string
     name: string
-    favorites: Array<number> | null | undefined
+    favorites: Array<number> | null
     contacts: Array<IContact> | null
 }
 
@@ -26,8 +26,13 @@ export interface IError {
     message: string
 }
 
-export interface IRegisterDate {
+export interface IRegisterData {
     name: string
+    email: string
+    password: string
+}
+
+export interface ILogin {
     email: string
     password: string
 }

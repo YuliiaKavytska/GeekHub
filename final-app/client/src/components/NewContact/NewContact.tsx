@@ -1,14 +1,15 @@
-import React, {ComponentType, useCallback} from 'react';
-import {compose} from "redux";
-import {withAuthRedirect} from "../HOC/withAuthRedirect";
-import Edit from "../Edit/Edit";
-import {IContact} from "../../types/types";
-import {StoreType} from "../../store";
-import {newContactTC} from "../../store/profile-reducer";
-import {connect} from "react-redux";
-import {useHistory} from "react-router-dom";
+import React, {ComponentType, useCallback} from 'react'
+import {compose} from "redux"
+import {withAuthRedirect} from "../HOC/withAuthRedirect"
+import Edit from "../Edit/Edit"
+import {IContact} from "../../types/types"
+import {StoreType} from "../../store"
+import {newContactTC} from "../../store/profile-reducer"
+import {connect} from "react-redux"
+import {useHistory} from "react-router-dom"
 
 const NewContact: React.FC<StateType> = ({contacts, error, newContactTC}) => {
+
     let lastId
     if (contacts && contacts.length > 0) {
         lastId = contacts[contacts.length - 1].id
@@ -48,7 +49,6 @@ const mapState = (state: StoreType) => ({
 const mapDispatch = {
     newContactTC
 }
-
 interface IDispatch {
     newContactTC: (data: IContact) => Promise<boolean>
 }

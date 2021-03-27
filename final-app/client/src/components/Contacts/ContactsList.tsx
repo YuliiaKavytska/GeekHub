@@ -1,7 +1,7 @@
-import React, {useCallback} from "react";
-import {IContact} from "../../types/types";
-import Contact from "./Contact";
-import {AllContacts} from "./ContactsType";
+import React, {useCallback} from "react"
+import {IContact} from "../../types/types"
+import Contact from "./Contact"
+import {AllContacts} from "./ContactsType"
 
 interface IState {
     contacts: Array<IContact>

@@ -10,8 +10,8 @@ import {withAuthRedirect} from "../HOC/withAuthRedirect"
 
 const ShowContainer: React.FC<StateType> = ({contacts, ShowErrorTC}) => {
 
-    const uri = useParams<{ [key: string]: string }>()
-    const user = contacts.find(contact => contact.id === Number(uri.id))
+    const uri = useParams<{[key: string]: string }>()
+    const user = contacts.find(contact => contact.id === +uri.id)
 
     if (!user) {
         ShowErrorTC({message: 'User wasn`t found'})
@@ -27,7 +27,6 @@ const mapState = (state: StoreType) => ({
 const dispatchState = {
     ShowErrorTC
 }
-
 type IDispatch = {
     ShowErrorTC: (err: IError, time?: number) => void
 }

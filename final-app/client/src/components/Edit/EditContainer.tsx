@@ -30,7 +30,7 @@ const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC, editCont
     let contact = contacts?.find(e => e.id === +param.id)
 
     if (!contact) {
-        ShowErrorTC({message: 'Sorry, but user wasn`t found'})
+        ShowErrorTC({message: 'User wasn`t found'})
         return <Redirect to='/contacts'/>
     }
     return <Edit contact={contact} deleteContact={deleteContact} editContact={editContact} error={error}/>

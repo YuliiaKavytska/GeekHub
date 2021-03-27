@@ -1,12 +1,11 @@
-const {Router} = require('express');
-const router = Router();
-const {resolve} = require('path');
-const fs = require('fs/promises');
-
+const {Router} = require('express')
+const router = Router()
+const {resolve} = require('path')
+const fs = require('fs/promises')
 const multer = require('multer')
 
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 
 const fileStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -17,9 +16,9 @@ const fileStorage = multer.diskStorage({
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
-            cb(null, true);
+            cb(null, true)
         } else {
-            cb(null, false);
+            cb(null, false)
         }
     }
 })
@@ -30,8 +29,8 @@ router.post('/getUser', async (req, res) => {
         const readData = await readContacts()
         const users = JSON.parse(readData)
         const {body: {email, password}} = req
-    
-        let user = findUser(users, email, 'email')
+
+        const user = findUser(users, email, 'email')
 
         if (!user) {
             throw new Error('User doesnt exist')
@@ -45,45 +44,29 @@ router.post('/getUser', async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({message: err.message})
-
     }
-    // readContacts()
-    //     .then(readData => {
-    //         const users = JSON.parse(readData)
-    //         const {body: {email, password}} = req
-    //         console.log(req.body)
-    //         let user = findUser(users, email, 'email')
-    //         console.log(user)
-    //         if (!user) {
-    //             throw new Error('User doesnt exist')
-    //         }
-    //
-    //         bcrypt.compare(password, user.password).then(result => {
-    //             if (result) {
-    //                 delete user.password
-    //                 res.json({data: user})
-    //             } else {
-    //                 throw new Error('Login or password is wrong')
-    //             }
-    //         }).catch((err) => {
-    //             console.log('error bycrypt')
-    //             res.status(500).json({message: err.message})
-    //         })
-    //     })
-    //     .catch((err) => res.status(500).json({message: err.message}))
 })
 
-router.post('/register', async (req, res) => {
+router.post('/signUp', async (req, res) => {
     try {
         const readData = await readContacts()
         const users = JSON.parse(readData)
         const {body: {email, password, name}} = req
         const user = findUser(users, email, 'email')
+
         if (user) {
             throw new Error(`User with email: ${email} already exist. Log In, please`)
         }
-        let newUser = {
-            id: users[users.length - 1].id + 1,
+
+        let lastId
+        if (users.length > 0) {
+            lastId = users[users.length - 1].id + 1
+        } else {
+            lastId = 1
+        }
+
+        const newUser = {
+            id: lastId,
             name,
             email,
             favorites: null,
@@ -96,50 +79,21 @@ router.post('/register', async (req, res) => {
         await writeFile(users)
         res.end()
     } catch (err) {
-        console.log('error reg')
         res.status(500).json({message: err.message})
     }
-    // readContacts()
-    //     .then(readData => {
-    //         const users = JSON.parse(readData)
-    //         const {body: {email, password, name}} = req
-    //         const user = findUser(users, email, 'email')
-    //         if (user) {
-    //             throw new Error(`User with email: ${email} already exist. Log In, please`)
-    //         }
-    //         let newUser = {
-    //             id: users[users.length - 1].id + 1,
-    //             name,
-    //             email,
-    //             favorites: null,
-    //             contacts: null
-    //         }
-    //         bcrypt.hash(password, saltRounds).then(hashedPassword => {
-    //             newUser.password = hashedPassword
-    //             users.push(newUser)
-    //
-    //             return writeFile(users).then(() => res.end())
-    //         }).catch((err) => {
-    //             console.log('error bycrypt')
-    //             res.status(500).json({message: err.message})
-    //         })
-    //     }).catch((err) => {
-    //     console.log('error reg')
-    //     res.status(500).json({message: err.message})
-    // })
 })
 
-router.put('/user/favorite', (req, res) => {
+router.put('/user/:userId/favorite/:id', (req, res) => {
     readContacts()
         .then(readData => {
             const users = JSON.parse(readData)
-            const {body: {userId, id}} = req
-            const user = findUser(users, userId)
+            const {params: {userId, id}} = req
+            const user = findUser(users, +userId)
 
             if (user.favorites) {
-                user.favorites.push(id)
+                user.favorites.push(+id)
             } else {
-                user.favorites = [id]
+                user.favorites = [+id]
             }
             return writeFile(users)
         })
@@ -147,28 +101,29 @@ router.put('/user/favorite', (req, res) => {
         .catch(err => res.status(500).json({message: err.message}))
 })
 
-router.delete('/user/favorite', (req, res) => {
+router.delete('/user/:userId/favorite/:id', (req, res) => {
     readContacts()
         .then(readData => {
             const users = JSON.parse(readData)
-            const {body: {userId, id}} = req
+            const {params: {userId, id}} = req
 
-            const user = findUser(users, userId)
-            user.favorites = user.favorites.filter(e => e !== id)
+            const user = findUser(users, +userId)
+            user.favorites = user.favorites.filter(e => e !== +id)
             return writeFile(users)
         })
         .then(() => res.end())
         .catch(err => res.status(500).json({message: err.message}))
 })
 
-router.delete('/user/contact', (req, res) => {
+router.delete('/user/:userId/contact/:id', (req, res) => {
     readContacts()
         .then(readData => {
             let users = JSON.parse(readData)
-            const {body: {userId, id}} = req
-            let user = findUser(users, userId)
-            user.contacts = user.contacts.filter(e => e.id !== id)
-            user.favorites = user.favorites.filter(e => e !== id)
+            const {params: {userId, id}} = req
+
+            let user = findUser(users, +userId)
+            user.contacts = user.contacts.filter(e => e.id !== +id)
+            user.favorites = user.favorites.filter(e => e !== +id)
 
             return writeFile(users)
         })
@@ -176,44 +131,45 @@ router.delete('/user/contact', (req, res) => {
         .catch(err => res.status(500).json({message: err.message}))
 })
 
-router.post('/user/contact/edit', upload, (req, res) => {
+router.post('/user/:userId/contact/edit', upload, (req, res) => {
     readContacts()
         .then(readData => {
             let users = JSON.parse(readData)
-            let {file, body: {userId, ...contactInfo}} = req
-
-            contactInfo.id = JSON.parse(contactInfo.id)
+            let {file, body, params: {userId}} = req
+            body.id = JSON.parse(body.id)
 
             if (file) {
-                contactInfo.avatar = '/' + file.originalname
+                body.avatar = '/' + file.originalname
             }
-            contactInfo.phones = JSON.parse(contactInfo.phones)
+            body.phones = JSON.parse(body.phones)
 
-            const user = findUser(users, +userId);
-            const contactIndex = user.contacts.findIndex(e => e.id === contactInfo.id)
-            user.contacts[contactIndex] = contactInfo
+            const user = findUser(users, +userId)
+            const contactIndex = user.contacts.findIndex(e => e.id === body.id)
+            user.contacts[contactIndex] = body
             return writeFile(users)
         })
         .then(() => res.end())
         .catch(err => res.status(500).json({message: err.message}))
 })
 
-router.post('/user/contact/new', upload, (req, res) => {
+router.post('/user/:userId/contact/new', upload, (req, res) => {
     readContacts()
         .then(readData => {
             let users = JSON.parse(readData)
-            let {file, body: {userId, ...contactInfo}} = req
+            let {file, body, params: {userId}} = req
             let user = findUser(users, +userId)
 
-            contactInfo.id = JSON.parse(contactInfo.id)
             if (file) {
-                contactInfo.avatar = '/' + file.originalname
+                body.avatar = '/' + file.originalname
             }
-            contactInfo.phones = JSON.parse(contactInfo.phones)
+
+            body.id = JSON.parse(body.id)
+            body.phones = JSON.parse(body.phones)
+
             if (user.contacts) {
-                user.contacts.push(contactInfo)
+                user.contacts.push(body)
             } else {
-                user.contacts = [contactInfo]
+                user.contacts = [body]
             }
 
             return writeFile(users)

@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 
 const UsersIcon: React.FC<{}> = () => {
     return <svg  width="25" height="25" fill="currentColor"

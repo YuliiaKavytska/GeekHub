@@ -1,18 +1,18 @@
-import React, {useCallback} from 'react';
-import {NavLink, Redirect} from "react-router-dom";
-import AppError from "../common/AppError";
-import {StoreType} from "../../store";
-import {initializeAppTC, RegisterTC} from "../../store/app-reducer";
-import {IRegisterDate} from "../../types/types";
-import {connect} from "react-redux";
-import HelloCard from "../common/HelloCard";
-import {Form, Formik} from 'formik';
-import * as yup from 'yup';
-import FormField from "../Edit/FormField";
+import React, {useCallback} from 'react'
+import {NavLink, Redirect} from "react-router-dom"
+import AppError from "../common/AppError"
+import {StoreType} from "../../store"
+import {RegisterTC} from "../../store/app-reducer"
+import {IRegisterData} from "../../types/types"
+import {connect} from "react-redux"
+import HelloCard from "../common/HelloCard"
+import {Form, Formik} from 'formik'
+import * as yup from 'yup'
+import FormField from "../common/FormFields/FormField"
 
-const SignUp: React.FC<StateType> = ({error, RegisterTC, isAuth, initializeAppTC}) => {
+const SignUp: React.FC<StateType> = ({error, RegisterTC, isAuth}) => {
 
-    let SignupSchema = yup.object({
+    const SignupSchema = yup.object({
         name: yup.string()
             .min(3)
             .matches(/^[a-zа-щієїґюьяыёъ\s]+$/i, 'Field should contain only characters')
@@ -27,26 +27,25 @@ const SignUp: React.FC<StateType> = ({error, RegisterTC, isAuth, initializeAppTC
             .matches(/[A-ZА-ЩІЄЇҐЮЬЯЫЁЪ]+/, 'Password should include one uppercase later')
             .required('Password is required')
     })
+
     const onSubmit = useCallback((values) => {
-        let result = RegisterTC(values)
-        result
-            .then(value => {
-                if (value) initializeAppTC()
-            })
-    }, [RegisterTC, initializeAppTC])
+        RegisterTC(values)
+    }, [RegisterTC])
+
+    const initialValues = {name: '', email: '', password: ''}
 
     if (isAuth) return <Redirect to='/contacts'/>
 
     return <div className="mt-4">
         <HelloCard title='Sign Up'/>
         {error && <AppError message={error.message}/>}
-        <Formik initialValues={{name: '', email: '', password: ''}}
+        <Formik initialValues={initialValues}
                 validationSchema={SignupSchema}
                 onSubmit={onSubmit}>
-            <Form className={'py-3'}>
-                <FormField name='name'/>
-                <FormField name='email'/>
-                <FormField name='password' type='password'/>
+            <Form className='py-3'>
+                <FormField name='name' placeholder='Name'/>
+                <FormField name='email' placeholder='name@example.com'/>
+                <FormField name='password' type='password' placeholder='Example123'/>
                 <button type="submit" className="btn btn-primary">Sign Up</button>
             </Form>
         </Formik>
@@ -59,14 +58,12 @@ const mapState = (state: StoreType) => ({
     error: state.app.error,
     isAuth: state.app.isAuth
 })
-const dispatchState = {
-    RegisterTC,
-    initializeAppTC
-}
 
+const dispatchState = {
+    RegisterTC
+}
 interface IDispatch {
-    RegisterTC: (data: IRegisterDate) => Promise<boolean>
-    initializeAppTC: () => void
+    RegisterTC: (data: IRegisterData) => void
 }
 
 type StateType = ReturnType<typeof mapState> & IDispatch

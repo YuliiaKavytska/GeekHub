@@ -1,7 +1,7 @@
-import React, {useCallback} from "react";
-import {FieldProps, getIn} from "formik";
-import cn from "classnames";
-import {defineOperator} from "./defineOperator";
+import React, {useCallback} from "react"
+import {FieldProps, getIn} from "formik"
+import cn from "classnames"
+import {defineOperator} from "../defineOperator"
 
 type IState = FieldProps & {
     push: () => void
@@ -26,7 +26,7 @@ export const PhoneField: React.FC<IState> = ({field, form, push, remove, length,
         <div className="col-md-12 mb-3">
             <div className="input-group">
                 <img src={operator} width="39" height="39" className="rounded float-left mr-3" alt=""/>
-                <input {...field}
+                <input {...field} placeholder='+380930000000'
                        className={cn("form-control", {'is-valid': isValid}, {'is-invalid': errorMessage})}
                 />
                 <div className="input-group-append">

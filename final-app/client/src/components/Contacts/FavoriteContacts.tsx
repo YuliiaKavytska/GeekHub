@@ -1,7 +1,7 @@
-import React, {useCallback} from "react";
-import {Favorite} from "./ContactsType";
-import {IContact} from "../../types/types";
-import Contact from "./Contact";
+import React, {useCallback} from "react"
+import {Favorite} from "./ContactsType"
+import {IContact} from "../../types/types"
+import Contact from "./Contact"
 
 interface IState {
     favorites: Array<IContact>
@@ -16,7 +16,8 @@ const FavoriteContacts: React.FC<IState> = ({favorites, toggleFavoriteUser}) => 
 
     return <>
         {favorites.length > 0 && <Favorite/>}
-        {favorites.map(contact => <Contact key={contact.id} contact={contact} toggleFavoriteUser={deleteFromFavorite} />)}
+        {favorites.map(contact => <Contact key={contact.id} contact={contact}
+                                           toggleFavoriteUser={deleteFromFavorite}/>)}
     </>
 }
 

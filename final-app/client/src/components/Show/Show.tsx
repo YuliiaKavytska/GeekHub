@@ -1,7 +1,7 @@
-import React from 'react';
-import {IContact} from "../../types/types";
-import anonim from '../../assets/image/anonim.png';
-import {NavLink} from 'react-router-dom';
+import React from 'react'
+import {IContact} from "../../types/types"
+import anonim from '../../assets/image/anonim.png'
+import {NavLink} from 'react-router-dom'
 
 interface IState {
     user: IContact
@@ -15,7 +15,7 @@ const Show: React.FC<IState> = ({user}) => {
         <div className="card-body text-primary">
             <div className="form-group d-flex">
                 <div className={'overflow-hidden size_show_page float-left mr-3'}>
-                    <img src={user.avatar || anonim} alt="" width="100%" height="auto"/>
+                    <img src={user.avatar || anonim} alt=""/>
                 </div>
 
                 <div>

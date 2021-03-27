@@ -1,12 +1,12 @@
-import React, {ChangeEvent, useCallback, useState} from 'react';
-import anonim from '../../assets/image/anonim.png';
-import {NavLink} from 'react-router-dom';
-import {Field, FieldArray, Form, Formik} from "formik";
-import {IContact, IError, IPhone} from "../../types/types";
-import * as yup from 'yup';
-import FormField from './FormField';
-import {PhoneField} from "./PhoneField";
-import AppError from "../common/AppError";
+import React, {ChangeEvent, useCallback, useState} from 'react'
+import anonim from '../../assets/image/anonim.png'
+import {NavLink} from 'react-router-dom'
+import {Field, FieldArray, Form, Formik} from "formik"
+import {IContact, IError, IPhone} from "../../types/types"
+import * as yup from 'yup'
+import FormField from '../common/FormFields/FormField'
+import {PhoneField} from "../common/FormFields/PhoneField"
+import AppError from "../common/AppError"
 
 interface IEditForm {
     deleteContact?: (id: number) => void
@@ -26,7 +26,7 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
 
     const validationSchema = yup.object({
         name: yup.string()
-            .matches(/^[a-zа-щієїґюьяыёъ\s]+$/i, 'Field should contain only characters')
+            .matches(/^[a-zа-щієїґюьяыёъ\s]+$/i, 'Field should contain only letters')
             .min(3)
             .max(100, 'Too Long!')
             .required('Name field is required'),
@@ -36,7 +36,7 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
                 id: yup.number(),
                 number: yup.string()
                     .trim()
-                    .matches(/^(\+38)?0(93|63|67|68|96|97|98|50|66|95|99)\d{7}$/, 'Incorrect phone number')
+                    .matches(/^(\+38)?0(93|63|67|68|96|97|98|50|66|95|99)\d{7}$/, 'Incorrect phone number. Operator does not exist. Use life, kievstar or vodafone')
                     .required('Field is required')
             })
         )
@@ -61,22 +61,22 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
             {(formProps) => {
 
                 if (typeof formProps.values.avatar !== "string") {
-                    const reader = new FileReader();
+                    const reader = new FileReader()
                     reader.onload = (event) => {
                         event.target && setImg(event.target.result as string)
                     }
-                    reader.readAsDataURL(formProps.values.avatar);
+                    reader.readAsDataURL(formProps.values.avatar)
                 }
 
                 const setImgField = (event: ChangeEvent<HTMLInputElement>) => {
-                    formProps.setFieldValue("avatar", event.target.files && event.target.files[0]);
+                    formProps.setFieldValue("avatar", event.target.files && event.target.files[0])
                 }
 
                 return (
                     <Form>
                         <div className="form-group d-flex">
-                            <div className={'overflow-hidden mr-4 size_edit'}>
-                                <img src={loadedImg || contact.avatar || anonim} width="100%" height="auto"
+                            <div className='overflow-hidden mr-4 size_edit'>
+                                <img src={loadedImg || contact.avatar || anonim}
                                      className="rounded float-left mr-3" alt=""/>
                             </div>
                             <div>
@@ -86,7 +86,7 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
                                        onChange={setImgField}/>
                             </div>
                         </div>
-                        <FormField name='name'/>
+                        <FormField name='name' placeholder='Name'/>
 
                         <div className="mb-4">
                             <p className="mr-2 d-inline">Phones</p>
@@ -110,9 +110,9 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
                             }}
                         </FieldArray>
 
-                        <FormField name='email' type='email'/>
-                        <FormField name='address'/>
-                        <FormField name='comment'/>
+                        <FormField name='email' type='email' placeholder='name@example.com'/>
+                        <FormField name='address' placeholder='Address'/>
+                        <FormField name='comment' placeholder='Comment'/>
 
                         <div className="btn-group" role="group" aria-label="Basic example">
                             <NavLink to='/contacts' className="btn btn-info">Cancel</NavLink>

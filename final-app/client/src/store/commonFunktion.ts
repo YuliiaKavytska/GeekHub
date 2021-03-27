@@ -1,4 +1,4 @@
-import {IContact, methodsTypes} from "../types/types";
+import {IContact, methodsTypes} from "../types/types"
 
 export const createFormData = (data: IContact<string | File>) => {
     let formData = new FormData();
