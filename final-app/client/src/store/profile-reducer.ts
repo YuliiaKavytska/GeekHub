@@ -15,29 +15,20 @@ const profileReducer = (state = initialState, action: ActionTypes): StateType =>
                 profile: action.profile
             }
         case "CA/CONTACTS/TOGGLE_FAV_USER":
-            let favList
-            if (action.event) {
-                if (!state.profile?.favorites) {
-                    favList = [action.id]
-                } else {
-                    favList = [...state.profile.favorites, action.id]
+            const changedContacts = state.profile?.contacts?.map(contact => {
+                if (contact._id === action.id) {
+                    return {
+                        ...contact,
+                        isFavorite: action.event
+                    }
                 }
-            } else {
-                favList = state.profile?.favorites?.filter(e => e !== action.id)
-            }
+                return contact
+            })
             return {
                 ...state,
                 profile: {
                     ...state.profile,
-                    favorites: favList
-                } as IUser
-            }
-        case "CA/CONTACTS/DELETE_FROM_FAVORITE":
-            return {
-                ...state,
-                profile: {
-                    ...state.profile,
-                    favorites: state.profile?.favorites?.filter(id => id !== action.id)
+                    contacts: changedContacts
                 } as IUser
             }
         case "CA/CONTACTS/DELETE_CONTACT":
@@ -45,11 +36,12 @@ const profileReducer = (state = initialState, action: ActionTypes): StateType =>
                 ...state,
                 profile: {
                     ...state.profile,
-                    contacts: state.profile?.contacts?.filter(e => e.id !== action.id)
+                    contacts: state.profile?.contacts?.filter(contact => contact._id !== action.id)
                 } as IUser
             }
         case "CA/CONTACTS/EDIT_USER_DATA":
-            const updatedContacts = state.profile?.contacts?.map((e) => e.id === action.data.id ? action.data : e)
+            const updatedContacts = state.profile?.contacts?.map(contact =>
+                contact._id === action.data._id ? action.data : contact)
             return {
                 ...state,
                 profile: {
@@ -79,7 +71,6 @@ const profileReducer = (state = initialState, action: ActionTypes): StateType =>
 export const actions = {
     setProfile: (profile: IUser | null) => ({type: 'CA/PROFILE/SET_PROFILE', profile} as const),
     toggleFavoriteUser: (id: number, event: boolean) => ({type: 'CA/CONTACTS/TOGGLE_FAV_USER', id, event} as const),
-    deleteFormFavorite: (id: number) => ({type: 'CA/CONTACTS/DELETE_FROM_FAVORITE', id} as const),
     deleteContact: (id: number) => ({type: 'CA/CONTACTS/DELETE_CONTACT', id} as const),
     addContact: (contact: IContact) => ({type: 'CA/CONTACTS/ADD_CONTACT', contact} as const),
     editUserData: (data: IContact) => ({type: 'CA/CONTACTS/EDIT_USER_DATA', data} as const)
@@ -93,54 +84,56 @@ export const getUserTC = (userData: { email: string, password: string }): ThunkT
         const profile = jsonResp.data
         dispatch(actions.setProfile(profile))
         return true
-    } else if (response.status === 500) {
+    }
+    try {
         const jsonResp = await response.json()
-        await dispatch(ShowErrorTC(jsonResp))
+        if (jsonResp.hasOwnProperty('message')) {
+            await dispatch(ShowErrorTC(jsonResp))
+        }
+    } catch (err) {
+        await dispatch(ShowErrorTC({message: 'Some error: user wasn`t be got.'}))
     }
 }
 
 export const changeFavoriteUserTC = (contactId: number, event: boolean): ThunkType => async (dispatch, getState) => {
     dispatch(actions.toggleFavoriteUser(contactId, event))
-    const userId = getState().profile.profile?.id
     let response
     if (event) {
-        response = await ajax(`/api/user/${userId}/favorite/${contactId}`, 'PUT')
+        response = await ajax(`/api/user/favorite/${contactId}`, 'PUT')
     } else {
-        response = await ajax(`/api/user/${userId}/favorite/${contactId}`, 'DELETE')
+        response = await ajax(`/api/user/favorite/${contactId}`, 'DELETE')
     }
     if (response.status !== 200) {
         dispatch(actions.toggleFavoriteUser(contactId, !event))
-        if (response.status === 500) {
-            const data = await response.json()
-            await dispatch(ShowErrorTC(data))
-        } else {
-            await dispatch(ShowErrorTC({message: 'Server error. Something wrong'}))
+
+        try {
+            const jsonResp = await response.json()
+            if (jsonResp.hasOwnProperty('message')) {
+                await dispatch(ShowErrorTC(jsonResp))
+            }
+        } catch (err) {
+            await dispatch(ShowErrorTC({message: 'Some error: can`t set contact`s favorite status.'}))
         }
     }
 }
 
 export const deleteContactTC = (id: number): ThunkType => async (dispatch, getState) => {
-    const deletedContact = getState().profile.profile?.contacts?.find(e => e.id === id)
-    const isFavoriteUser = getState().profile.profile?.favorites?.find(id => id === deletedContact?.id)
+    const deletedContact = getState().profile.profile?.contacts?.find(contact => contact._id === id)
     dispatch(actions.deleteContact(id))
-    if (isFavoriteUser && deletedContact?.id) {
-        dispatch(actions.deleteFormFavorite(deletedContact?.id))
-    }
 
-    const userId = getState().profile.profile?.id
-    const response = await ajax(`/api/user/${userId}/contact/${id}`, 'DELETE')
+    const response = await ajax(`/api/user/contact/${id}`, 'DELETE')
     if (response.status !== 200) {
         if (deletedContact) {
             dispatch(actions.addContact(deletedContact))
-            if (isFavoriteUser) {
-                dispatch(actions.toggleFavoriteUser(deletedContact.id, true))
-            }
         }
-        if (response.status === 500) {
-            const data = await response.json()
-            await dispatch(ShowErrorTC(data))
-        } else {
-            await dispatch(ShowErrorTC({message: 'Server error. Something wrong, user can`t be deleted'}))
+
+        try {
+            const jsonResp = await response.json()
+            if (jsonResp.hasOwnProperty('message')) {
+                await dispatch(ShowErrorTC(jsonResp))
+            }
+        } catch (err) {
+            await dispatch(ShowErrorTC({message: 'Some error: Something wrong, user can`t be deleted.'}))
         }
     }
 }
@@ -152,46 +145,52 @@ export const LogOutTC = (): ThunkType => async (dispatch) => {
 }
 
 export const editContactDataTC = (data: IContact<string | File>): ThunkType<Promise<boolean | undefined>> => async (dispatch, getState) => {
-    const currentContactState = getState().profile.profile?.contacts?.find(e => e.id === data.id)
+    const currentContactState = getState().profile.profile?.contacts?.find(contact => contact._id === data._id)
 
     const formData = createFormData(data)
-    const userId = getState().profile.profile?.id
-
     if (typeof data.avatar === 'object') {
         data.avatar = '/' + data.avatar.name
     }
     dispatch(actions.editUserData(data as IContact))
 
-    let response = await fetch(`/api/user/${userId}/contact/edit`, {method: "POST", body: formData})
+    let response = await fetch(`/api/user/contact/edit`, {method: "POST", body: formData})
     if (response.status === 200) return true
 
     dispatch(actions.editUserData(currentContactState as IContact))
-    if (response.status === 500) {
-        const data = await response.json()
-        await dispatch(ShowErrorTC(data))
-    } else {
-        await dispatch(ShowErrorTC({message: 'Server error. Something wrong, user`s info can`t be changed'}))
+
+    try {
+        const jsonResp = await response.json()
+        if (jsonResp.hasOwnProperty('message')) {
+            await dispatch(ShowErrorTC(jsonResp))
+        }
+    } catch (err) {
+        await dispatch(ShowErrorTC({message: 'Some error: Something wrong, user`s info can`t be changed.'}))
     }
 }
 
 export const newContactTC = (data: IContact<string | File>): ThunkType<Promise<boolean | undefined>> => async (dispatch, getState) => {
-    const formData = createFormData(data)
-    const userId = getState().profile.profile?.id
+    const userId = getState().profile.profile?._id
 
+    const formData = createFormData(data)
     if (typeof data.avatar === 'object') {
         data.avatar = '/' + data.avatar.name
     }
-    dispatch(actions.addContact(data as IContact))
 
-    let response = await fetch(`/api/user/${userId}/contact/new`, {method: "POST", body: formData})
-    if (response.status === 200) return true
+    const response = await fetch(`/api/user/${userId}/contact/new`, {method: "POST", body: formData})
+    if (response.status === 200) {
+        const responseJson = await response.json()
+        data._id = responseJson._id
+        dispatch(actions.addContact(data as IContact))
+        return true
+    }
 
-    dispatch(actions.deleteContact(data.id))
-    if (response.status === 500) {
-        const data = await response.json()
-        await dispatch(ShowErrorTC(data))
-    } else {
-        await dispatch(ShowErrorTC({message: 'Server error. Something wrong, user`s info can`t be changed'}))
+    try {
+        const jsonResp = await response.json()
+        if (jsonResp.hasOwnProperty('message')) {
+            await dispatch(ShowErrorTC(jsonResp))
+        }
+    } catch (err) {
+        await dispatch(ShowErrorTC({message: 'Some error: Something wrong, user`s info can`t be added.'}))
     }
 }
 

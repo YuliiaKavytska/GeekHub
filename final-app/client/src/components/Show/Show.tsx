@@ -25,7 +25,7 @@ const Show: React.FC<IState> = ({user}) => {
                     <div>
                         <p className="card-title font-weight-bold">Phones: </p>
                         {user.phones.map(phone =>
-                            <a key={phone.id} href={'tel:' + phone.number} className="d-block">{phone.number}</a>
+                            <a key={phone._id} href={'tel:' + phone.number} className="d-block">{phone.number}</a>
                         )}
                     </div>
                 </div>

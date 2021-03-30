@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const Footer: React.FC = () => {
     return <div className="card-footer d-flex justify-content-around">

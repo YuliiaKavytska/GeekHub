@@ -1,12 +1,13 @@
 const {Router} = require('express')
 const router = Router()
-const {resolve} = require('path')
-const fs = require('fs/promises')
-const multer = require('multer')
 
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 
+const User = require('./models/User')
+const Contact = require('./models/Contact')
+
+const multer = require('multer')
 const fileStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'public/uploads')
@@ -24,21 +25,26 @@ const fileStorage = multer.diskStorage({
 })
 const upload = multer({storage: fileStorage}).single('avatar')
 
-router.post('/getUser', async (req, res) => {
+router.post('/getUser', async (req, res, next) => {
     try {
-        const readData = await readContacts()
-        const users = JSON.parse(readData)
         const {body: {email, password}} = req
 
-        const user = findUser(users, email, 'email')
-
+        const user = await User.findOne({email}, {'__v': false})
         if (!user) {
-            throw new Error('User doesnt exist')
+            throw new Error('User doesn`t exist')
         }
+        const sendUser = user.toObject()
 
         if (await bcrypt.compare(password, user.password)) {
-            delete user.password
-            res.json({data: user})
+            delete sendUser.password
+            const userContacts = await Contact.find({owner: user._id}, {'owner': false, '__v': false})
+            if (userContacts.length > 0) {
+                sendUser.contacts = userContacts
+            } else {
+                sendUser.contacts = null
+            }
+
+            res.json({data: sendUser})
         } else {
             throw new Error('Login or password is wrong')
         }
@@ -49,145 +55,143 @@ router.post('/getUser', async (req, res) => {
 
 router.post('/signUp', async (req, res) => {
     try {
-        const readData = await readContacts()
-        const users = JSON.parse(readData)
         const {body: {email, password, name}} = req
-        const user = findUser(users, email, 'email')
+        const user = await User.findOne({email})
 
         if (user) {
-            throw new Error(`User with email: ${email} already exist. Log In, please`)
+            res.status(500).json({message: `User with email: ${email} already exist. Log In, please`})
         }
 
+        const lastUser = await User.find({}).sort({_id: -1}).limit(1);
+
         let lastId
-        if (users.length > 0) {
-            lastId = users[users.length - 1].id + 1
+        if (lastUser.length > 0) {
+            lastId = lastUser[0]._id + 1
         } else {
             lastId = 1
         }
 
-        const newUser = {
-            id: lastId,
+        const hashedPassword = await bcrypt.hash(password, saltRounds)
+
+        const newUser = new User({
+            _id: lastId,
             name,
             email,
-            favorites: null,
-            contacts: null
-        }
-        const hashedPassword = await bcrypt.hash(password, saltRounds)
-        newUser.password = hashedPassword
-        users.push(newUser)
+            password: hashedPassword
+        })
 
-        await writeFile(users)
+        await newUser.save()
+
         res.end()
     } catch (err) {
-        res.status(500).json({message: err.message})
+        console.log(err.message)
+        res.status(500).json({message: 'Server error. Can`t register user'})
     }
 })
 
-router.put('/user/:userId/favorite/:id', (req, res) => {
-    readContacts()
-        .then(readData => {
-            const users = JSON.parse(readData)
-            const {params: {userId, id}} = req
-            const user = findUser(users, +userId)
+router.put('/user/favorite/:id', async (req, res) => {
+    try {
+        const {params: {id}} = req
 
-            if (user.favorites) {
-                user.favorites.push(+id)
-            } else {
-                user.favorites = [+id]
-            }
-            return writeFile(users)
-        })
-        .then(() => res.end())
-        .catch(err => res.status(500).json({message: err.message}))
+        const contact = await Contact.findById(id)
+
+        if (!contact) {
+            throw new Error('User can`t be find')
+        }
+
+        await Contact.findByIdAndUpdate(id, {isFavorite: true})
+        res.end()
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({message: 'Server error. Can`t interact with favorites'})
+    }
 })
 
-router.delete('/user/:userId/favorite/:id', (req, res) => {
-    readContacts()
-        .then(readData => {
-            const users = JSON.parse(readData)
-            const {params: {userId, id}} = req
+router.delete('/user/favorite/:id', async (req, res) => {
+    try {
+        const {params: {id}} = req
 
-            const user = findUser(users, +userId)
-            user.favorites = user.favorites.filter(e => e !== +id)
-            return writeFile(users)
-        })
-        .then(() => res.end())
-        .catch(err => res.status(500).json({message: err.message}))
+        const contact = await Contact.findById(id)
+
+        if (!contact) {
+            throw new Error('Contact can`t be find')
+        }
+
+        await Contact.findByIdAndUpdate(id, {isFavorite: false})
+        res.end()
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({message: 'Server error. Can`t interact with favorites'})
+    }
 })
 
-router.delete('/user/:userId/contact/:id', (req, res) => {
-    readContacts()
-        .then(readData => {
-            let users = JSON.parse(readData)
-            const {params: {userId, id}} = req
+router.delete('/user/contact/:id', async (req, res) => {
+    try {
+        const {params: {id}} = req
 
-            let user = findUser(users, +userId)
-            user.contacts = user.contacts.filter(e => e.id !== +id)
-            user.favorites = user.favorites.filter(e => e !== +id)
+        const contact = await Contact.findById(id)
 
-            return writeFile(users)
-        })
-        .then(() => res.end())
-        .catch(err => res.status(500).json({message: err.message}))
+        if (!contact) {
+            throw new Error('Contact can`t be find')
+        }
+        await Contact.findByIdAndDelete(id)
+        res.end()
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({message: 'Server error. Can`t interact with contacts'})
+    }
 })
 
-router.post('/user/:userId/contact/edit', upload, (req, res) => {
-    readContacts()
-        .then(readData => {
-            let users = JSON.parse(readData)
-            let {file, body, params: {userId}} = req
-            body.id = JSON.parse(body.id)
+router.post('/user/contact/edit', upload, async (req, res) => {
+    try {
+        let {file, body} = req
 
-            if (file) {
-                body.avatar = '/' + file.originalname
-            }
-            body.phones = JSON.parse(body.phones)
+        const contact = await Contact.findById(body._id)
+        if (!contact) {
+            throw new Error('Contact can`t be find')
+        }
 
-            const user = findUser(users, +userId)
-            const contactIndex = user.contacts.findIndex(e => e.id === body.id)
-            user.contacts[contactIndex] = body
-            return writeFile(users)
-        })
-        .then(() => res.end())
-        .catch(err => res.status(500).json({message: err.message}))
+        body._id = JSON.parse(body._id)
+        body.phones = JSON.parse(body.phones)
+        if (file) {
+            body.avatar = '/' + file.originalname
+        }
+
+        await Contact.findByIdAndUpdate(body._id, body)
+        res.end()
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({message: 'Server error. Can`t interact with contacts'})
+    }
 })
 
-router.post('/user/:userId/contact/new', upload, (req, res) => {
-    readContacts()
-        .then(readData => {
-            let users = JSON.parse(readData)
-            let {file, body, params: {userId}} = req
-            let user = findUser(users, +userId)
+router.post('/user/:userId/contact/new', upload, async (req, res) => {
+    try {
+        let {file, body, params: {userId}} = req
 
-            if (file) {
-                body.avatar = '/' + file.originalname
-            }
+        const lastContact = await Contact.find({}).sort({_id: -1}).limit(1);
 
-            body.id = JSON.parse(body.id)
-            body.phones = JSON.parse(body.phones)
+        if (lastContact.length > 0) {
+            body._id = lastContact[0]._id + 1
+        } else {
+            body._id = 1
+        }
 
-            if (user.contacts) {
-                user.contacts.push(body)
-            } else {
-                user.contacts = [body]
-            }
+        body.owner = +userId
+        body.phones = JSON.parse(body.phones)
+        if (file) {
+            body.avatar = '/' + file.originalname
+        }
 
-            return writeFile(users)
+        const newContact = new Contact({
+            ...body
         })
-        .then(() => res.end())
-        .catch(err => res.status(500).json({message: err.message}))
+        await newContact.save()
+        res.json({_id: body._id})
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({message: 'Server error. Can`t interact with contacts'})
+    }
 })
-
-function findUser(arr, prop, propName = 'id') {
-    return arr.find(element => element[propName] === prop)
-}
-
-function writeFile(obj) {
-    return fs.writeFile(resolve(__dirname, 'contacts.json'), JSON.stringify(obj, null, 2))
-}
-
-function readContacts() {
-    return fs.readFile(resolve(__dirname, 'contacts.json'))
-}
 
 module.exports = router

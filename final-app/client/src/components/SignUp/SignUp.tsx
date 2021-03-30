@@ -62,6 +62,7 @@ const mapState = (state: StoreType) => ({
 const dispatchState = {
     RegisterTC
 }
+
 interface IDispatch {
     RegisterTC: (data: IRegisterData) => void
 }

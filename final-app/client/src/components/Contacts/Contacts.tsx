@@ -16,8 +16,8 @@ const Contacts: React.FC<StateType> = ({profile, error, changeFavoriteUserTC}) =
         changeFavoriteUserTC(id, event)
     }, [changeFavoriteUserTC])
 
-    const favoriteFilter = profile.contacts?.filter(contact => profile.favorites?.includes(contact.id))
-    const otherContacts = profile.contacts?.filter(contact => !profile.favorites?.includes(contact.id))
+    const favoriteFilter = profile.contacts?.filter(contact => contact.isFavorite)
+    const otherContacts = profile.contacts?.filter(contact => !contact.isFavorite)
 
     return <>
         <div className='mt-3 d-flex align-items-center justify-content-between'>

@@ -1,23 +1,23 @@
-import React, {ComponentType, useCallback} from "react";
-import {Redirect, useHistory, useParams} from "react-router-dom";
-import {ShowErrorTC} from "../../store/app-reducer";
-import {StoreType} from "../../store";
-import {deleteContactTC, editContactDataTC} from "../../store/profile-reducer";
-import {compose} from "redux";
-import {connect} from "react-redux";
-import {withAuthRedirect} from "../HOC/withAuthRedirect";
-import Edit from "./Edit";
-import {IContact} from "../../types/types";
+import React, {ComponentType, useCallback} from "react"
+import {Redirect, useHistory, useParams} from "react-router-dom"
+import {ShowErrorTC} from "../../store/app-reducer"
+import {StoreType} from "../../store"
+import {deleteContactTC, editContactDataTC} from "../../store/profile-reducer"
+import {compose} from "redux"
+import {connect} from "react-redux"
+import {withAuthRedirect} from "../HOC/withAuthRedirect"
+import Edit from "./Edit"
+import {IContact, IError} from "../../types/types"
 
-const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC, editContactDataTC, error}) => {
+const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC, editContactDataTC, ShowErrorTC, error}) => {
 
     const deleteContact = useCallback((id: number) => {
         deleteContactTC(id)
     }, [deleteContactTC])
 
-    let history = useHistory()
+    const history = useHistory()
     const editContact = useCallback((data: IContact) => {
-        let result = editContactDataTC(data)
+        const result = editContactDataTC(data)
 
         result.then(result => {
             if (result) {
@@ -27,7 +27,7 @@ const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC, editCont
     }, [editContactDataTC, history])
 
     const param = useParams<{ [key: string]: string }>()
-    let contact = contacts?.find(e => e.id === +param.id)
+    const contact = contacts?.find(contact => contact._id === +param.id)
 
     if (!contact) {
         ShowErrorTC({message: 'User wasn`t found'})
@@ -43,12 +43,14 @@ const mapState = (state: StoreType) => ({
 
 const mapDispatch = {
     deleteContactTC,
-    editContactDataTC
+    editContactDataTC,
+    ShowErrorTC
 }
 
 interface IDispatch {
     deleteContactTC: (id: number) => void
     editContactDataTC: (data: IContact) => Promise<boolean>
+    ShowErrorTC: (err: IError, time?: number) => void
 }
 
 type StateType = ReturnType<typeof mapState> & IDispatch

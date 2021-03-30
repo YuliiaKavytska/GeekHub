@@ -55,6 +55,7 @@ const mapState = (state: StoreType) => ({
 const dispatchState = {
     LogInTC
 }
+
 interface IDispatch {
     LogInTC: (data: { email: string, password: string }) => void
 }

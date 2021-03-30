@@ -1,24 +1,24 @@
 export interface IPhone {
-    id: number
+    _id: number
     number: string
 }
 
 export type IContact<A = string> = {
     [key: string]: any
-    id: number
+    _id: number
     name: string
     avatar: A
     email: string
     address: string
     comment: string
+    isFavorite: boolean
     phones: Array<IPhone>
 }
 
 export interface IUser {
-    id: number
+    _id: number
     email: string
     name: string
-    favorites: Array<number> | null
     contacts: Array<IContact> | null
 }
 

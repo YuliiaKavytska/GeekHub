@@ -5,7 +5,6 @@ import {ajax} from "./commonFunktion"
 
 let initialState = {
     initialized: false,
-    isFetching: true,
     error: null as IError | null,
     isAuth: false
 }
@@ -41,15 +40,20 @@ export const actions = {
 export const initializeAppTC = (): ThunkType => async (dispatch, getState) => {
     let storage = await localStorage.getItem('CA/user')
     if (storage) {
-        let userData = JSON.parse(storage)
-        if (userData.hasOwnProperty('email') && userData.hasOwnProperty('password')) {
-            let response = await dispatch(getUserTC(userData))
+        try {
+            const userData = JSON.parse(storage)
 
-            if (response) {
-                dispatch(actions.setAuthorized(true))
+            if (userData.hasOwnProperty('email') && userData.hasOwnProperty('password')) {
+                const response = await dispatch(getUserTC(userData))
+
+                if (response) {
+                    dispatch(actions.setAuthorized(true))
+                }
+            } else {
+                await dispatch(ShowErrorTC({message: 'Your data is incorrect. Log In with correct login and password'}))
             }
-        } else {
-            await dispatch(ShowErrorTC({message: 'Your data is incorrect. Log In with correct login and password'}))
+        } catch (err) {
+            await dispatch(ShowErrorTC({message: 'Some error: Something wrong, user`s info can`t be got.'}))
         }
     }
     if (!getState().app.initialized) {
@@ -63,8 +67,14 @@ export const RegisterTC = (data: IRegisterData): ThunkType => async (dispatch) =
         localStorage.setItem('CA/user', JSON.stringify({email: data.email, password: data.password}))
         await dispatch(initializeAppTC())
     } else {
-        let data = await response.json()
-        await dispatch(ShowErrorTC(data))
+        try {
+            const jsonResp = await response.json()
+            if (jsonResp.hasOwnProperty('message')) {
+                await dispatch(ShowErrorTC(jsonResp))
+            }
+        } catch (err) {
+            await dispatch(ShowErrorTC({message: 'Some error: Something wrong, user`s info can`t be registered.'}))
+        }
     }
 }
 
@@ -73,7 +83,7 @@ export const LogInTC = (data: ILogin): ThunkType => async (dispatch) => {
     await dispatch(initializeAppTC())
 }
 
-export const ShowErrorTC = (err: IError, time: number = 3000): ThunkType => async (dispatch) => {
+export const ShowErrorTC = (err: IError, time: number = 5000): ThunkType => async (dispatch) => {
     dispatch(actions.setError(err))
     setTimeout(() => dispatch(actions.setError(null)), time)
 }

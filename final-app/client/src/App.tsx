@@ -22,6 +22,18 @@ const SuspendedSignUp = withSuspense(SignUp)
 
 const App: React.FC<StateType> = ({initialized, initializeAppTC}) => {
 
+    function catchError(e: PromiseRejectionEvent) {
+        alert(`Unhandled error! Reason: ${e.reason}`)
+    }
+
+    useEffect(() => {
+        window.addEventListener('unhandledrejection', catchError)
+
+        return () => {
+            window.removeEventListener('unhandledrejection', catchError)
+        }
+    }, [])
+
     useEffect(() => {
         initializeAppTC()
     }, [initializeAppTC])
@@ -34,9 +46,9 @@ const App: React.FC<StateType> = ({initialized, initializeAppTC}) => {
                 <Route path='/login' exact render={() => <SuspendedLogin/>}/>
                 <Route path='/signup' exact render={() => <SuspendedSignUp/>}/>
                 <Route path='/contacts' exact render={() => <Contacts/>}/>
-                <Route path='/newContact' render={() => <NewContact/>}/>
-                <Route path='/show/:id?' render={() => <ShowContainer/>}/>
-                <Route path='/edit/:id?' render={() => <EditContainer/>}/>
+                <Route path='/newContact' exact render={() => <NewContact/>}/>
+                <Route path='/show/:id?' exact render={() => <ShowContainer/>}/>
+                <Route path='/edit/:id?' exact render={() => <EditContainer/>}/>
                 <Route path='/*' render={() => <NotFound/>}/>
             </Switch>
             }
@@ -60,8 +72,11 @@ const mapState = (state: StoreType) => ({
 const dispatchState = {
     initializeAppTC
 }
+interface IDispatch {
+    initializeAppTC: () => void
+}
 
-type StateType = ReturnType<typeof mapState> & { initializeAppTC: () => void }
+type StateType = ReturnType<typeof mapState> & IDispatch
 const AppConnected = connect(mapState, dispatchState)(App)
 
 export default AppContainer

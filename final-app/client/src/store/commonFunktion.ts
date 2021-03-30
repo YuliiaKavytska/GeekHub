@@ -17,8 +17,7 @@ export const ajax = (url: string, method: methodsTypes, body = {}): Promise<any>
         method,
         headers: {
             "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": 'http://localhost:8000/'
+            "Content-Type": "application/json"
         }
     }
     if (Object.keys(body).length > 0) {
@@ -27,8 +26,9 @@ export const ajax = (url: string, method: methodsTypes, body = {}): Promise<any>
     return fetch(url, settings)
 }
 
-interface  ISettings {
+interface ISettings {
     [key: string]: string | object
-    headers: {[key: string]: string}
+
+    headers: { [key: string]: string }
     method: methodsTypes
 }

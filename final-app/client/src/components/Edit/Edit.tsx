@@ -20,9 +20,9 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
 
     const deleteCurrentContact = useCallback(() => {
         if (deleteContact) {
-            deleteContact(contact.id)
+            deleteContact(contact._id)
         }
-    }, [deleteContact, contact.id])
+    }, [deleteContact, contact._id])
 
     const validationSchema = yup.object({
         name: yup.string()
@@ -36,7 +36,8 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
                 id: yup.number(),
                 number: yup.string()
                     .trim()
-                    .matches(/^(\+38)?0(93|63|67|68|96|97|98|50|66|95|99)\d{7}$/, 'Incorrect phone number. Operator does not exist. Use life, kievstar or vodafone')
+                    .matches(/^(\+38)?0(93|63|67|68|96|97|98|50|66|95|99)\d{7}$/,
+                        'Incorrect phone number. Operator does not exist. Use life, kievstar or vodafone')
                     .required('Field is required')
             })
         )
@@ -50,7 +51,7 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
         }
     }
 
-    let [loadedImg, setImg] = useState<null | string>(null)
+    const [loadedImg, setImg] = useState<null | string>(null)
 
     return <div className='my-4'>
         {error && <AppError message={error.message}/>}
@@ -95,15 +96,15 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
                             {({push, remove, form}) => {
                                 const {values: {phones}} = form
                                 const length = phones.length
-                                const lastId = phones[length - 1].id
+                                const lastId = phones[length - 1]._id
 
-                                return phones.map((e: IPhone, i: number) => {
+                                return phones.map((phone: IPhone, i: number) => {
                                         const name = `phones[${i}].number`
 
-                                        return <Field key={e.id} component={PhoneField} name={name}
+                                        return <Field key={phone._id} component={PhoneField} name={name}
                                                       length={length} lastId={lastId}
-                                                      phone={e.number} i={i}
-                                                      push={() => push({id: lastId + 1, number: ''})}
+                                                      phone={phone.number} i={i}
+                                                      push={() => push({_id: lastId + 1, number: ''})}
                                                       remove={() => remove(i)}/>
                                     }
                                 )
