@@ -20,9 +20,9 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
 
     const deleteCurrentContact = useCallback(() => {
         if (deleteContact) {
-            deleteContact(contact._id)
+            deleteContact(contact.id)
         }
-    }, [deleteContact, contact._id])
+    }, [deleteContact, contact.id])
 
     const validationSchema = yup.object({
         name: yup.string()
@@ -96,15 +96,15 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
                             {({push, remove, form}) => {
                                 const {values: {phones}} = form
                                 const length = phones.length
-                                const lastId = phones[length - 1]._id
+                                const lastId = phones[length - 1].id
 
                                 return phones.map((phone: IPhone, i: number) => {
                                         const name = `phones[${i}].number`
 
-                                        return <Field key={phone._id} component={PhoneField} name={name}
+                                        return <Field key={phone.id} component={PhoneField} name={name}
                                                       length={length} lastId={lastId}
                                                       phone={phone.number} i={i}
-                                                      push={() => push({_id: lastId + 1, number: ''})}
+                                                      push={() => push({id: lastId + 1, number: ''})}
                                                       remove={() => remove(i)}/>
                                     }
                                 )

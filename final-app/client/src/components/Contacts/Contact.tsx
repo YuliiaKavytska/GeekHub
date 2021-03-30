@@ -14,21 +14,21 @@ interface IState {
 const Contact: React.FC<IState> = ({contact, toggleFavoriteUser}) => {
 
     const changeFavoriteStatus = useCallback(() => {
-        toggleFavoriteUser(contact._id)
-    }, [toggleFavoriteUser, contact._id])
+        toggleFavoriteUser(contact.id)
+    }, [toggleFavoriteUser, contact.id])
 
     return <li className="media list-group-item list-group-item-action d-flex align-items-center">
-        <NavLink to={'/show/' + contact._id} className="d-flex mr-auto">
+        <NavLink to={'/show/' + contact.id} className="d-flex mr-auto">
             <div className='overflow-hidden mr-4 size_show'>
                 <img src={contact.avatar || anonim} className="rounded float-left mr-3" alt=""/>
             </div>
         </NavLink>
         <div className="media-body mr-auto">
-            <NavLink to={'/show/' + contact._id} className="d-flex mr-auto">
+            <NavLink to={'/show/' + contact.id} className="d-flex mr-auto">
                 <h5 className="mt-0 mb-1">{contact.name}</h5>
             </NavLink>
             {contact.phones.map(phone =>
-                <a key={phone._id} className="d-block" href={"tel:" + phone.number}>{phone.number}</a>
+                <a key={phone.id} className="d-block" href={"tel:" + phone.number}>{phone.number}</a>
             )}
         </div>
         <div className="btn-group" role="group" aria-label="Basic example">
@@ -38,7 +38,7 @@ const Contact: React.FC<IState> = ({contact, toggleFavoriteUser}) => {
             <button className='btn btn-warning' onClick={changeFavoriteStatus}>
                 <StarIcon size={18}/>
             </button>
-            <NavLink to={'/edit/' + contact._id} type='button' className='btn btn-danger'>
+            <NavLink to={'/edit/' + contact.id} type='button' className='btn btn-danger'>
                 <EditingIcon/>Edit
             </NavLink>
         </div>

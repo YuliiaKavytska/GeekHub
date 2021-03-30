@@ -1,11 +1,11 @@
 export interface IPhone {
-    _id: number
+    id: number
     number: string
 }
 
 export type IContact<A = string> = {
     [key: string]: any
-    _id: number
+    id: number
     name: string
     avatar: A
     email: string
@@ -16,7 +16,7 @@ export type IContact<A = string> = {
 }
 
 export interface IUser {
-    _id: number
+    id: number
     email: string
     name: string
     contacts: Array<IContact> | null

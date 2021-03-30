@@ -4,6 +4,13 @@ const port = process.env.port || 8000
 const {resolve} = require('path')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
+mongoose.set('toJSON', {
+    virtuals: true,
+    transform: (doc, converted) => {
+        converted.id = +converted.id
+        delete converted._id;
+    }
+});
 
 server.use(bodyParser.json())
 

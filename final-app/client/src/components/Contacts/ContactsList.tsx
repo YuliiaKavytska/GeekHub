@@ -16,7 +16,7 @@ const ContactsList: React.FC<IState> = ({contacts, toggleFavoriteUser}) => {
 
     return <>
         {contacts.length > 0 && <AllContacts/>}
-        {contacts.map(contact => <Contact key={contact._id} contact={contact}
+        {contacts.map(contact => <Contact key={contact.id} contact={contact}
                                           toggleFavoriteUser={deleteFromFavorite}/>)}
     </>
 }

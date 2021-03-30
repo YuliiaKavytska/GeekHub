@@ -11,14 +11,14 @@ import {useHistory} from "react-router-dom"
 const NewContact: React.FC<StateType> = ({error, newContactTC}) => {
 
     const newContact: IContact = {
-        _id: 1,
+        id: 1,
         name: '',
         avatar: '',
         email: '',
         address: '',
         comment: '',
         isFavorite: false,
-        phones: [{_id: 1, number: ''}]
+        phones: [{id: 1, number: ''}]
     }
 
     const history = useHistory()

@@ -11,7 +11,7 @@ import {withAuthRedirect} from "../HOC/withAuthRedirect"
 const ShowContainer: React.FC<StateType> = ({contacts, ShowErrorTC}) => {
 
     const uri = useParams<{ [key: string]: string }>()
-    const user = contacts.find(contact => contact._id === +uri.id)
+    const user = contacts.find(contact => contact.id === +uri.id)
 
     if (!user) {
         ShowErrorTC({message: 'User wasn`t found'})

@@ -16,7 +16,7 @@ const profileReducer = (state = initialState, action: ActionTypes): StateType =>
             }
         case "CA/CONTACTS/TOGGLE_FAV_USER":
             const changedContacts = state.profile?.contacts?.map(contact => {
-                if (contact._id === action.id) {
+                if (contact.id === action.id) {
                     return {
                         ...contact,
                         isFavorite: action.event
@@ -36,12 +36,12 @@ const profileReducer = (state = initialState, action: ActionTypes): StateType =>
                 ...state,
                 profile: {
                     ...state.profile,
-                    contacts: state.profile?.contacts?.filter(contact => contact._id !== action.id)
+                    contacts: state.profile?.contacts?.filter(contact => contact.id !== action.id)
                 } as IUser
             }
         case "CA/CONTACTS/EDIT_USER_DATA":
             const updatedContacts = state.profile?.contacts?.map(contact =>
-                contact._id === action.data._id ? action.data : contact)
+                contact.id === action.data.id ? action.data : contact)
             return {
                 ...state,
                 profile: {
@@ -118,7 +118,7 @@ export const changeFavoriteUserTC = (contactId: number, event: boolean): ThunkTy
 }
 
 export const deleteContactTC = (id: number): ThunkType => async (dispatch, getState) => {
-    const deletedContact = getState().profile.profile?.contacts?.find(contact => contact._id === id)
+    const deletedContact = getState().profile.profile?.contacts?.find(contact => contact.id === id)
     dispatch(actions.deleteContact(id))
 
     const response = await ajax(`/api/user/contact/${id}`, 'DELETE')
@@ -145,7 +145,7 @@ export const LogOutTC = (): ThunkType => async (dispatch) => {
 }
 
 export const editContactDataTC = (data: IContact<string | File>): ThunkType<Promise<boolean | undefined>> => async (dispatch, getState) => {
-    const currentContactState = getState().profile.profile?.contacts?.find(contact => contact._id === data._id)
+    const currentContactState = getState().profile.profile?.contacts?.find(contact => contact.id === data.id)
 
     const formData = createFormData(data)
     if (typeof data.avatar === 'object') {
@@ -169,7 +169,7 @@ export const editContactDataTC = (data: IContact<string | File>): ThunkType<Prom
 }
 
 export const newContactTC = (data: IContact<string | File>): ThunkType<Promise<boolean | undefined>> => async (dispatch, getState) => {
-    const userId = getState().profile.profile?._id
+    const userId = getState().profile.profile?.id
 
     const formData = createFormData(data)
     if (typeof data.avatar === 'object') {
@@ -179,7 +179,7 @@ export const newContactTC = (data: IContact<string | File>): ThunkType<Promise<b
     const response = await fetch(`/api/user/${userId}/contact/new`, {method: "POST", body: formData})
     if (response.status === 200) {
         const responseJson = await response.json()
-        data._id = responseJson._id
+        data.id = responseJson.id
         dispatch(actions.addContact(data as IContact))
         return true
     }

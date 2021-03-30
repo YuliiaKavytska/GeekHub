@@ -27,7 +27,7 @@ const EditContainer: React.FC<StateType> = ({contacts, deleteContactTC, editCont
     }, [editContactDataTC, history])
 
     const param = useParams<{ [key: string]: string }>()
-    const contact = contacts?.find(contact => contact._id === +param.id)
+    const contact = contacts?.find(contact => contact.id === +param.id)
 
     if (!contact) {
         ShowErrorTC({message: 'User wasn`t found'})

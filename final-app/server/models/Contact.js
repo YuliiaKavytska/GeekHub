@@ -31,5 +31,4 @@ const contactSchema = new Schema({
     phones: [{_id: Number, number: {type: String}}]
 })
 
-
 module.exports = model('Contact', contactSchema)

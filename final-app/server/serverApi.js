@@ -33,17 +33,16 @@ router.post('/getUser', async (req, res, next) => {
         if (!user) {
             throw new Error('User doesn`t exist')
         }
-        const sendUser = user.toObject()
+        const sendUser = user.toJSON()
 
         if (await bcrypt.compare(password, user.password)) {
             delete sendUser.password
             const userContacts = await Contact.find({owner: user._id}, {'owner': false, '__v': false})
             if (userContacts.length > 0) {
-                sendUser.contacts = userContacts
+                sendUser.contacts = userContacts.map(contact => contact.toJSON())
             } else {
                 sendUser.contacts = null
             }
-
             res.json({data: sendUser})
         } else {
             throw new Error('Login or password is wrong')
@@ -145,14 +144,15 @@ router.delete('/user/contact/:id', async (req, res) => {
 router.post('/user/contact/edit', upload, async (req, res) => {
     try {
         let {file, body} = req
+        body._id = JSON.parse(body.id)
+        delete body.id
 
         const contact = await Contact.findById(body._id)
         if (!contact) {
             throw new Error('Contact can`t be find')
         }
 
-        body._id = JSON.parse(body._id)
-        body.phones = JSON.parse(body.phones)
+        body.phones = JSON.parse(body.phones).map(phone => ({_id: phone.id, number: phone.number}))
         if (file) {
             body.avatar = '/' + file.originalname
         }
@@ -171,6 +171,7 @@ router.post('/user/:userId/contact/new', upload, async (req, res) => {
 
         const lastContact = await Contact.find({}).sort({_id: -1}).limit(1);
 
+        delete body.id
         if (lastContact.length > 0) {
             body._id = lastContact[0]._id + 1
         } else {
@@ -178,16 +179,14 @@ router.post('/user/:userId/contact/new', upload, async (req, res) => {
         }
 
         body.owner = +userId
-        body.phones = JSON.parse(body.phones)
+        body.phones = JSON.parse(body.phones).map(phone => ({_id: phone.id, number: phone.number}))
         if (file) {
             body.avatar = '/' + file.originalname
         }
 
-        const newContact = new Contact({
-            ...body
-        })
+        const newContact = new Contact(body)
         await newContact.save()
-        res.json({_id: body._id})
+        res.json({id: body._id})
     } catch (err) {
         console.log(err.message)
         res.status(500).json({message: 'Server error. Can`t interact with contacts'})
