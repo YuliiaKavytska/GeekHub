@@ -43,13 +43,13 @@ const Edit: React.FC<IEditForm> = ({contact, deleteContact, editContact, newCont
         )
     })
 
-    const onSubmit = (values: IContact) => {
+    const onSubmit = useCallback((values: IContact) => {
         if (editContact) {
             editContact(values)
         } else if (newContactTC) {
             newContactTC(values)
         }
-    }
+    }, [editContact, newContactTC])
 
     const [loadedImg, setImg] = useState<null | string>(null)
 

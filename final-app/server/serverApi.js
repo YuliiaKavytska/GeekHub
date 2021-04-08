@@ -38,11 +38,7 @@ router.post('/getUser', async (req, res, next) => {
         if (await bcrypt.compare(password, user.password)) {
             delete sendUser.password
             const userContacts = await Contact.find({owner: user._id}, {'owner': false, '__v': false})
-            if (userContacts.length > 0) {
-                sendUser.contacts = userContacts.map(contact => contact.toJSON())
-            } else {
-                sendUser.contacts = null
-            }
+            sendUser.contacts = userContacts.length > 0 ? userContacts.map(contact => contact.toJSON()) : null
             res.json({data: sendUser})
         } else {
             throw new Error('Login or password is wrong')

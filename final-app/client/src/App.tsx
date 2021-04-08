@@ -42,13 +42,13 @@ const App: React.FC<StateType> = ({initialized, initializeAppTC}) => {
         <Header/>
         <main className='container mb-3 flex-grow-1'>
             {!initialized ? <Preloader/> : <Switch>
-                <Route path='/' exact render={() => <Contacts/>}/>
-                <Route path='/login' exact render={() => <SuspendedLogin/>}/>
-                <Route path='/signup' exact render={() => <SuspendedSignUp/>}/>
-                <Route path='/contacts' exact render={() => <Contacts/>}/>
-                <Route path='/newContact' exact render={() => <NewContact/>}/>
-                <Route path='/show/:id?' exact render={() => <ShowContainer/>}/>
-                <Route path='/edit/:id?' exact render={() => <EditContainer/>}/>
+                <Route path='/' exact component={Contacts}/>
+                <Route path='/login' exact component={SuspendedLogin}/>
+                <Route path='/signup' exact component={SuspendedSignUp}/>
+                <Route path='/contacts' exact component={Contacts}/>
+                <Route path='/newContact' exact component={NewContact}/>
+                <Route path='/show/:id?' exact component={ShowContainer}/>
+                <Route path='/edit/:id?' exact component={EditContainer}/>
                 <Route path='/*' render={() => <NotFound/>}/>
             </Switch>
             }
